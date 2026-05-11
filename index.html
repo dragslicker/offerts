@@ -10,7 +10,7 @@
 <meta name="description" content="Gör professionella offerter på plats — på 60 sekunder">
 <link rel="manifest" href="/manifest.json">
 <!-- Apple touch icon -->
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%230E0D0B'/><text x='256' y='340' text-anchor='middle' font-family='Georgia,serif' font-size='280' font-style='italic' fill='%23E8B84B'>K</text></svg>">
+<link rel="apple-touch-icon" href="/icon.svg">
 <title>Offerts — Offert på plats</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -5754,7 +5754,7 @@ function openShareScreen(id) {
   const q = quotes.find(x => x.id == id);
   if (!q) return;
   S('share-back').onclick = () => showDetail(id, detailFrom);
-  const fakeLink = `https://offerts.se/offert/${q.qNum || id}`;
+  const fakeLink = buildShareUrl(q);
   const company = settings.company || 'Ditt Företag';
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   const phone = (q.custPhone || '').replace(/\s/g, '');
@@ -6081,10 +6081,69 @@ function checkOnboarding() {
 // which is already added in the HTML id="quota-area"
 
 /* ══════════════════════════════════════
+   LÄNKDELNING — hash-baserad offertvy
+══════════════════════════════════════ */
+function buildShareUrl(q) {
+  var payload = {
+    qNum: q.qNum, projectName: q.projectName, projectIcon: q.projectIcon,
+    trade: q.trade, custName: q.custName, date: q.date,
+    lines: q.lines, sub: q.sub, rotAmt: q.rotAmt, rotPct: q.rotPct,
+    vat: q.vat, grand: q.grand, vatPct: q.vatPct, aiDesc: q.aiDesc,
+    company: settings.company || '', companyPhone: settings.phone || ''
+  };
+  try {
+    return location.origin + '/#share=' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  } catch(e) { return location.origin; }
+}
+
+function checkSharedView() {
+  var hash = location.hash;
+  if (!hash.startsWith('#share=')) return false;
+  try {
+    var data = JSON.parse(decodeURIComponent(escape(atob(hash.slice(7)))));
+    renderSharedQuote(data);
+    return true;
+  } catch(e) { return false; }
+}
+
+function renderSharedQuote(q) {
+  var landing = S('scr-landing');
+  if (landing) landing.style.display = 'none';
+  var tMap = { bygg:'Bygg & Snickeri', el:'El & Installation', vvs:'VVS & Rör', mark:'Mark & Anläggning', maleri:'Måleri' };
+  var div = document.createElement('div');
+  div.style.cssText = 'min-height:100svh;background:var(--bg);color:var(--t1);font-family:var(--sans);overflow-y:auto;padding:24px 20px 56px;max-width:430px;margin:0 auto';
+  var linesHtml = (q.lines || []).map(function(l) {
+    return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(232,184,75,0.06);font-size:13px"><span style="color:var(--t2)">' + l.label + '</span><span style="font-family:var(--mono)">' + fmtSEK(l.cost) + '</span></div>';
+  }).join('');
+  div.innerHTML =
+    '<div style="font-family:\'Instrument Serif\',serif;font-size:26px;margin-bottom:28px;letter-spacing:-0.5px">Offert<em style="font-style:italic;color:#E8B84B">s</em></div>' +
+    '<div style="background:var(--s1);border:1px solid var(--br);border-radius:20px;padding:24px;margin-bottom:16px">' +
+      '<div style="font-size:36px;margin-bottom:10px">' + (q.projectIcon || '📋') + '</div>' +
+      '<div style="font-family:\'Instrument Serif\',serif;font-size:24px;margin-bottom:4px">' + (q.projectName || 'Offert') + '</div>' +
+      '<div style="font-size:12px;color:var(--t3)">' + (tMap[q.trade] || '') + (q.date ? ' · ' + q.date : '') + '</div>' +
+      (q.custName ? '<div style="font-size:13px;color:var(--t2);margin-top:6px">Till: <strong>' + q.custName + '</strong></div>' : '') +
+      '<div style="font-family:var(--mono);font-size:34px;color:#E8B84B;margin-top:16px;font-weight:500">' + fmtSEK(q.grand || 0) + '</div>' +
+      '<div style="font-size:11px;color:var(--t3);margin-top:4px">inkl. moms' + (q.rotAmt > 0 ? ' efter ROT-avdrag' : '') + '</div>' +
+    '</div>' +
+    (q.aiDesc ? '<div style="background:var(--s2);border:1px solid var(--br);border-radius:14px;padding:16px;margin-bottom:16px;font-size:13px;color:var(--t2);line-height:1.7">' + q.aiDesc + '</div>' : '') +
+    '<div style="background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:16px;margin-bottom:16px">' +
+      linesHtml +
+      (q.rotAmt > 0 ? '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(232,184,75,0.06);font-size:13px"><span style="color:#4FAF72">ROT-avdrag (' + q.rotPct + '%)</span><span style="font-family:var(--mono);color:#4FAF72">−' + fmtSEK(q.rotAmt) + '</span></div>' : '') +
+      '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(232,184,75,0.06);font-size:13px"><span style="color:var(--t2)">Moms (' + (q.vatPct || 25) + '%)</span><span style="font-family:var(--mono)">' + fmtSEK(q.vat || 0) + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;padding:12px 0;font-size:15px;font-weight:700"><span>Totalt att betala</span><span style="font-family:var(--mono);color:#E8B84B">' + fmtSEK(q.grand || 0) + '</span></div>' +
+    '</div>' +
+    (q.company ? '<div style="text-align:center;font-size:12px;color:var(--t3)">' + q.company + (q.companyPhone ? ' · ' + q.companyPhone : '') + '</div>' : '') +
+    '<div style="text-align:center;font-size:11px;color:var(--t3);margin-top:6px">' + (q.qNum ? 'Offert ' + q.qNum + ' · ' : '') + 'Giltig 30 dagar</div>';
+  document.body.appendChild(div);
+}
+
+/* ══════════════════════════════════════
    INIT ADDITIONS
 ══════════════════════════════════════ */
 initTheme();
-initApp();
+if (!checkSharedView()) {
+  initApp();
+}
 </script>
 </body>
 </html>
