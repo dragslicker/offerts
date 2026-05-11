@@ -1350,6 +1350,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 ══════════════════════════════════════ */
 var SUPA_URL = 'https://ultkrbhjmhcfwehhxehp.supabase.co';
 var SUPA_KEY = 'sb_publishable_r3sBln7ZwLwHYwwOWmDgmA_YcsRD3dw';
+var ANTHROPIC_KEY = '';
 
 /* ══════════════════════════════════════
    STATE
@@ -2041,6 +2042,11 @@ function selPlan(p) {
   });
 }
 let billingYearly = false;
+const PLANS = {
+  starter:    { name: 'Starter',    quotesPerMonth: 20,       users: 3 },
+  pro:        { name: 'Pro',        quotesPerMonth: Infinity, users: 10 },
+  enterprise: { name: 'Enterprise', quotesPerMonth: Infinity, users: Infinity }
+};
 function isPro() {
   var p = user && user.plan || settings.plan || 'pro';
   return p === 'pro' || p === 'enterprise';
@@ -4721,10 +4727,13 @@ async function generateAIDescription(q) {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 150,
         messages: [{
           role: 'user',
@@ -5516,10 +5525,13 @@ Svara BARA med JSON.`;
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 200,
         messages: [{
           role: 'user',
@@ -6054,7 +6066,7 @@ function renderROTCalc(laborCost, rotPct, container) {
 ══════════════════════════════════════ */
 function checkOnboarding() {
   if (!localStorage.getItem('kly_onboarded')) {
-    startOnboarding();
+    showOnboarding();
     return true;
   }
   return false;
