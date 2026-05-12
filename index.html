@@ -1358,9 +1358,17 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <div class="s-sect">
       <div class="s-sect-hd">💰 Priser</div>
       <div class="s-body">
-        <div class="ff"><label>Timkostnad (kr/tim)</label><input type="number" id="s-hourly" value="695"></div>
-        <div class="ff"><label>Utkörningsavgift (kr)</label><input type="number" id="s-delivery" value="450"></div>
+        <div class="ff"><label>Timkostnad (kr/tim)</label><input type="number" id="s-hourly" value="795"></div>
+        <div class="ff"><label>Utkörningsavgift (kr)</label><input type="number" id="s-delivery" value="650"></div>
         <div class="ff"><label>Moms %</label><select id="s-vat"><option value="25">25%</option><option value="12">12%</option><option value="0">Momsfri</option></select></div>
+        <div class="ff">
+          <label>Materialpåslag %</label>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input type="number" id="s-markup" value="10" min="0" max="100" style="flex:1">
+            <span style="font-size:13px;color:var(--t3);white-space:nowrap">% på material</span>
+          </div>
+          <div style="font-size:11px;color:var(--t3);margin-top:4px;line-height:1.5">Läggs automatiskt till alla materialkostnader i offerten. Syns som en separat rad i prissammanfattningen.</div>
+        </div>
       </div>
     </div>
     <div class="s-sect">
@@ -1747,7 +1755,7 @@ var ANTHROPIC_KEY = '';
 ══════════════════════════════════════ */
 var quotes = JSON.parse(localStorage.getItem('kly_quotes') || '[]');
 var customers = JSON.parse(localStorage.getItem('kly_customers') || '[]');
-var settings = JSON.parse(localStorage.getItem('kly_settings') || '{"hourly":695,"delivery":450,"vat":25,"profession":"snickare","plan":"pro"}');
+var settings = JSON.parse(localStorage.getItem('kly_settings') || '{"hourly":795,"delivery":650,"vat":25,"markup":10,"profession":"snickare","plan":"pro"}');
 var user = null;
 var supaUser = null;
 var accentColor = settings.accentColor || '#E8B84B';
@@ -4252,8 +4260,8 @@ function getCostPer(f) {
 }
 function renderCalcInputs() {
   if (!selectedProject) return;
-  const hourly = parseFloat(settings.hourly) || 695;
-  const delCost = parseFloat(settings.delivery) || 450;
+  const hourly = parseFloat(settings.hourly) || 795;
+  const delCost = parseFloat(settings.delivery) || 650;
   const groups = {
     arbete: {
       lbl: '⏱ Arbete',
@@ -4345,11 +4353,13 @@ function calcPrice() {
     grand: 0,
     arbCost: 0
   };
-  const hourly = parseFloat(settings.hourly) || 695;
-  const delCost = parseFloat(settings.delivery) || 450;
+  const hourly = parseFloat(settings.hourly) || 795;
+  const delCost = parseFloat(settings.delivery) || 650;
   const vatPct = parseInt(settings.vat) || 25;
+  const markupPct = parseFloat(settings.markup) || 0;
   let lines = [],
-    arbCost = 0;
+    arbCost = 0,
+    matCost = 0;
   selectedProject.fields.forEach(f => {
     var _ref3, _fieldValues$f$id2;
     if (f.type === 'rot') return;
@@ -4358,6 +4368,7 @@ function calcPrice() {
     if (f.type === 'toggle' && val < 1) return;
     let cost = 0,
       lbl = f.label;
+    const isMat = f.tag === 'material';
     if (f.type === 'toggle') {
       var _priceList$utkorning$2, _priceList$utkorning2;
       cost = f.id === 'utkorning' ? (_priceList$utkorning$2 = (_priceList$utkorning2 = priceList['utkorning']) === null || _priceList$utkorning2 === void 0 ? void 0 : _priceList$utkorning2.price) !== null && _priceList$utkorning$2 !== void 0 ? _priceList$utkorning$2 : delCost : getCostPer(f);
@@ -4371,12 +4382,14 @@ function calcPrice() {
     } else {
       cost = val * getCostPer(f);
     }
-    if (cost > 0) lines.push({
-      label: lbl,
-      cost,
-      cat: f.tag || 'ovrigt'
-    });
+    if (cost > 0) {
+      if (isMat) matCost += cost;
+      lines.push({ label: lbl, cost, cat: f.tag || 'ovrigt' });
+    }
   });
+  // Material markup line
+  const markupAmt = markupPct > 0 && matCost > 0 ? Math.round(matCost * markupPct / 100) : 0;
+  if (markupAmt > 0) lines.push({ label: `Materialpåslag ${markupPct}%`, cost: markupAmt, cat: 'markup' });
   const sub = lines.reduce((s, l) => s + l.cost, 0);
   const rotPct = fieldValues['rot'] || 0;
   const rotAmt = rotPct > 0 ? arbCost * (rotPct / 100) : 0;
@@ -4391,6 +4404,8 @@ function calcPrice() {
     vat,
     grand,
     arbCost,
+    matCost,
+    markupAmt,
     vatPct
   };
 }
@@ -5321,7 +5336,7 @@ function fallbackDownload(url, fname) {
    SETTINGS
 ══════════════════════════════════════ */
 function loadSettings() {
-  ['company', 'name', 'orgnr', 'phone', 'email', 'addr', 'bg', 'hourly', 'delivery', 'vat', 'fskatt', 'terms'].forEach(k => {
+  ['company', 'name', 'orgnr', 'phone', 'email', 'addr', 'bg', 'hourly', 'delivery', 'vat', 'fskatt', 'terms', 'markup'].forEach(k => {
     const el = S('s-' + k);
     if (el && settings[k] !== undefined) el.value = settings[k];
   });
@@ -5340,7 +5355,7 @@ function loadSettings() {
   }
 }
 function saveSettings() {
-  var skeys = ['company','name','orgnr','phone','email','addr','bg','hourly','delivery','vat','fskatt','terms'];
+  var skeys = ['company','name','orgnr','phone','email','addr','bg','hourly','delivery','vat','fskatt','terms','markup'];
   for (var si = 0; si < skeys.length; si++) {
     var sel = S('s-' + skeys[si]);
     if (sel) settings[skeys[si]] = sel.value;
@@ -5393,384 +5408,101 @@ function removeLogo() {
 
 // Default preset prices per category
 const PRICE_PRESETS = {
-  bygg: [{
-    id: 'virke_reg',
-    icon: '🪵',
-    name: 'Reglar 45×120mm',
-    unit: 'm',
-    price: 32
-  }, {
-    id: 'virke_45x70',
-    icon: '🪵',
-    name: 'Reglar 45×70mm',
-    unit: 'm',
-    price: 22
-  }, {
-    id: 'kl_tra',
-    icon: '🪵',
-    name: 'KL-trä konstruktionsvirke',
-    unit: 'm',
-    price: 45
-  }, {
-    id: 'hardtra',
-    icon: '🌿',
-    name: 'Hårdträ (Bangkirai/Ipe)',
-    unit: 'm²',
-    price: 620
-  }, {
-    id: 'tryckimp',
-    icon: '🪵',
-    name: 'Tryckimpregnerat trä',
-    unit: 'm²',
-    price: 280
-  }, {
-    id: 'komposit',
-    icon: '🔲',
-    name: 'Kompositträ altan',
-    unit: 'm²',
-    price: 450
-  }, {
-    id: 'gipsskiva',
-    icon: '⬜',
-    name: 'Gipsskiva 13mm 2400×1200',
-    unit: 'st',
-    price: 85
-  }, {
-    id: 'betong',
-    icon: '🧱',
-    name: 'Betong C25/30',
-    unit: 'm³',
-    price: 1400
-  }, {
-    id: 'armering',
-    icon: '⚙️',
-    name: 'Betongstål armering',
-    unit: 'kg',
-    price: 12
-  }, {
-    id: 'skruv_balk',
-    icon: '🔩',
-    name: 'Skruv & balksko (per altan m²)',
-    unit: 'm²',
-    price: 45
-  }, {
-    id: 'parkett',
-    icon: '🟫',
-    name: 'Parkett (standard)',
-    unit: 'm²',
-    price: 320
-  }, {
-    id: 'vinyl',
-    icon: '🟫',
-    name: 'Vinyl/LVT-golv',
-    unit: 'm²',
-    price: 220
-  }, {
-    id: 'klinker_golv',
-    icon: '🔶',
-    name: 'Klinker golv',
-    unit: 'm²',
-    price: 280
-  }, {
-    id: 'takpannor',
-    icon: '🏠',
-    name: 'Betongpannor (standard)',
-    unit: 'm²',
-    price: 180
-  }, {
-    id: 'plåttak',
-    icon: '🏠',
-    name: 'Plåttak stålskiva',
-    unit: 'm²',
-    price: 320
-  }],
-  el: [{
-    id: 'kabel_25',
-    icon: '🔌',
-    name: 'Kabel NYM-J 3×2,5mm²',
-    unit: 'm',
-    price: 22
-  }, {
-    id: 'kabel_15',
-    icon: '🔌',
-    name: 'Kabel NYM-J 3×1,5mm²',
-    unit: 'm',
-    price: 14
-  }, {
-    id: 'kabel_4',
-    icon: '🔌',
-    name: 'Kabel NYM-J 5×4mm²',
-    unit: 'm',
-    price: 38
-  }, {
-    id: 'uttag_dubbel',
-    icon: '🔲',
-    name: 'Dubbeluttag inkl. dosa',
-    unit: 'st',
-    price: 220
-  }, {
-    id: 'brytare',
-    icon: '🔲',
-    name: 'Strömbrytare enkelpol',
-    unit: 'st',
-    price: 185
-  }, {
-    id: 'jfb',
-    icon: '⚡',
-    name: 'Jordfelsbrytare 25A',
-    unit: 'st',
-    price: 650
-  }, {
-    id: 'automat',
-    icon: '⚡',
-    name: 'Automatsäkring 16A',
-    unit: 'st',
-    price: 120
-  }, {
-    id: 'led_spot',
-    icon: '💡',
-    name: 'LED-spotlight 7W (inkl. lampa)',
-    unit: 'st',
-    price: 380
-  }, {
-    id: 'armatur_tak',
-    icon: '💡',
-    name: 'LED-armatur tak',
-    unit: 'st',
-    price: 850
-  }, {
-    id: 'laddbox',
-    icon: '🔋',
-    name: 'Laddbox EV 11kW typ 2',
-    unit: 'st',
-    price: 8500
-  }, {
-    id: 'elcentral',
-    icon: '⚡',
-    name: 'Elcentral 12-pol 3-fas',
-    unit: 'st',
-    price: 5800
-  }],
-  vvs: [{
-    id: 'pex_15',
-    icon: '🔧',
-    name: 'PEX-rör 15mm',
-    unit: 'm',
-    price: 28
-  }, {
-    id: 'koppar_15',
-    icon: '🔧',
-    name: 'Kopparrör 15mm',
-    unit: 'm',
-    price: 45
-  }, {
-    id: 'avlopp_75',
-    icon: '🔧',
-    name: 'PVC avloppsrör 75mm',
-    unit: 'm',
-    price: 55
-  }, {
-    id: 'avlopp_110',
-    icon: '🔧',
-    name: 'PVC avloppsrör 110mm',
-    unit: 'm',
-    price: 85
-  }, {
-    id: 'toalett',
-    icon: '🚽',
-    name: 'Toalett komplett set',
-    unit: 'st',
-    price: 3200
-  }, {
-    id: 'duschblandare',
-    icon: '🚿',
-    name: 'Duschblandare termostat',
-    unit: 'st',
-    price: 2800
-  }, {
-    id: 'blandare_disk',
-    icon: '🚰',
-    name: 'Blandare diskho',
-    unit: 'st',
-    price: 1400
-  }, {
-    id: 'vvb_200',
-    icon: '🌡️',
-    name: 'Varmvattenberedare 200L',
-    unit: 'st',
-    price: 8900
-  }, {
-    id: 'tatskikt',
-    icon: '🛡️',
-    name: 'Tätskikt Weber.sys 822',
-    unit: 'm²',
-    price: 280
-  }, {
-    id: 'golvbrunn',
-    icon: '⭕',
-    name: 'Golvbrunn',
-    unit: 'st',
-    price: 550
-  }, {
-    id: 'kulventil',
-    icon: '🔩',
-    name: 'Kulventil 1"',
-    unit: 'st',
-    price: 380
-  }, {
-    id: 'varmepump_ll',
-    icon: '❄️',
-    name: 'Värmepump luft/luft 5kW',
-    unit: 'st',
-    price: 18000
-  }],
-  mark: [{
-    id: 'grus',
-    icon: '⬛',
-    name: 'Grus/makadam',
-    unit: 'ton',
-    price: 280
-  }, {
-    id: 'sand',
-    icon: '🟡',
-    name: 'Sand',
-    unit: 'ton',
-    price: 220
-  }, {
-    id: 'asfalt',
-    icon: '⬛',
-    name: 'Asfalt',
-    unit: 'ton',
-    price: 900
-  }, {
-    id: 'dran_ror',
-    icon: '🔵',
-    name: 'Dräneringsrör 100mm',
-    unit: 'm',
-    price: 55
-  }, {
-    id: 'fiberduk',
-    icon: '⬜',
-    name: 'Fiberduk (per m²)',
-    unit: 'm²',
-    price: 18
-  }, {
-    id: 'container',
-    icon: '📦',
-    name: 'Container 6m³ per vecka',
-    unit: 'vecka',
-    price: 650
-  }, {
-    id: 'grävmaskin',
-    icon: '🚜',
-    name: 'Grävmaskin inkl. förare',
-    unit: 'tim',
-    price: 950
-  }],
-  maleri: [{
-    id: 'inomhusfarg',
-    icon: '🖌️',
-    name: 'Inomhusfärg (standard)',
-    unit: 'L',
-    price: 75
-  }, {
-    id: 'utomhusfarg',
-    icon: '🖌️',
-    name: 'Utomhusfärg (täckande)',
-    unit: 'L',
-    price: 95
-  }, {
-    id: 'grund',
-    icon: '🖌️',
-    name: 'Grundfärg',
-    unit: 'L',
-    price: 65
-  }, {
-    id: 'tapet_standard',
-    icon: '📜',
-    name: 'Tapet (standard)',
-    unit: 'rulle',
-    price: 220
-  }, {
-    id: 'tapet_design',
-    icon: '📜',
-    name: 'Tapet (design/premium)',
-    unit: 'rulle',
-    price: 480
-  }, {
-    id: 'spackel',
-    icon: '🔲',
-    name: 'Spackel 5kg',
-    unit: 'hink',
-    price: 185
-  }, {
-    id: 'avmask',
-    icon: '🎀',
-    name: 'Avmakningstejp 50m',
-    unit: 'rulle',
-    price: 65
-  }, {
-    id: 'skyddsplast',
-    icon: '🎀',
-    name: 'Skyddsplast 4×25m',
-    unit: 'rl',
-    price: 120
-  }, {
-    id: 'stall_vecka',
-    icon: '🪜',
-    name: 'Ställning hyra',
-    unit: 'vecka',
-    price: 2800
-  }],
-  ovrigt: [{
-    id: 'h_snickare',
-    icon: '⏱️',
-    name: 'Snickare timkostnad',
-    unit: 'tim',
-    price: 695
-  }, {
-    id: 'h_elektriker',
-    icon: '⏱️',
-    name: 'Elektriker timkostnad',
-    unit: 'tim',
-    price: 780
-  }, {
-    id: 'h_rormoakre',
-    icon: '⏱️',
-    name: 'Rörmokare timkostnad',
-    unit: 'tim',
-    price: 750
-  }, {
-    id: 'h_malare',
-    icon: '⏱️',
-    name: 'Målare timkostnad',
-    unit: 'tim',
-    price: 680
-  }, {
-    id: 'h_markarbetare',
-    icon: '⏱️',
-    name: 'Markarbetare timkostnad',
-    unit: 'tim',
-    price: 650
-  }, {
-    id: 'utkorning',
-    icon: '🚚',
-    name: 'Utkörningsavgift',
-    unit: 'st',
-    price: 450
-  }, {
-    id: 'container_sm',
-    icon: '📦',
-    name: 'Container 3m³',
-    unit: 'st',
-    price: 450
-  }, {
-    id: 'restid',
-    icon: '🚗',
-    name: 'Restid/milersättning',
-    unit: 'mil',
-    price: 25
-  }]
+  bygg: [
+    { id:'virke_reg',    icon:'🪵', name:'Reglar 45×120mm',             unit:'m',    price: 42  },
+    { id:'virke_45x70',  icon:'🪵', name:'Reglar 45×70mm',              unit:'m',    price: 28  },
+    { id:'kl_tra',       icon:'🪵', name:'KL-trä konstruktionsvirke',    unit:'m',    price: 55  },
+    { id:'hardtra',      icon:'🌿', name:'Hårdträ (Bangkirai/Ipe)',       unit:'m²',   price: 780 },
+    { id:'tryckimp',     icon:'🪵', name:'Tryckimpregnerat trä',         unit:'m²',   price: 340 },
+    { id:'komposit',     icon:'🔲', name:'Kompositträ altan',            unit:'m²',   price: 580 },
+    { id:'gipsskiva',    icon:'⬜', name:'Gipsskiva 13mm 2400×1200',     unit:'st',   price: 110 },
+    { id:'gips_brand',   icon:'⬜', name:'Brandgipsskiva 15mm',          unit:'st',   price: 145 },
+    { id:'isolering_min',icon:'🌫️', name:'Mineralull 95mm skivor',       unit:'m²',   price: 95  },
+    { id:'betong',       icon:'🧱', name:'Betong C25/30 (levererad)',     unit:'m³',   price: 1850},
+    { id:'armering',     icon:'⚙️', name:'Betongstål armering',          unit:'kg',   price: 16  },
+    { id:'skruv_balk',   icon:'🔩', name:'Skruv & balksko (per altan m²)',unit:'m²',  price: 58  },
+    { id:'parkett',      icon:'🟫', name:'Parkett (standard)',            unit:'m²',   price: 420 },
+    { id:'parkett_prem', icon:'🟫', name:'Parkett (premium ek)',          unit:'m²',   price: 780 },
+    { id:'vinyl',        icon:'🟫', name:'Vinyl/LVT-golv',               unit:'m²',   price: 310 },
+    { id:'klinker_golv', icon:'🔶', name:'Klinker golv (standard)',       unit:'m²',   price: 380 },
+    { id:'klinker_vagg', icon:'🔶', name:'Klinker vägg (standard)',       unit:'m²',   price: 340 },
+    { id:'takpannor',    icon:'🏠', name:'Betongpannor (standard)',        unit:'m²',   price: 240 },
+    { id:'plåttak',      icon:'🏠', name:'Plåttak stålskiva',             unit:'m²',   price: 420 },
+    { id:'membrantak',   icon:'🏠', name:'Takduk/membran (platt tak)',    unit:'m²',   price: 280 },
+    { id:'fonsterdorr',  icon:'🪟', name:'Fönster standard 3-glas',       unit:'st',   price:5800 },
+    { id:'dorr_innerdorr',icon:'🚪',name:'Innerdörr komplett inkl. karm', unit:'st',   price:3200 },
+  ],
+  el: [
+    { id:'kabel_25',    icon:'🔌', name:'Kabel NYM-J 3×2,5mm²',         unit:'m',    price: 32  },
+    { id:'kabel_15',    icon:'🔌', name:'Kabel NYM-J 3×1,5mm²',         unit:'m',    price: 20  },
+    { id:'kabel_4',     icon:'🔌', name:'Kabel NYM-J 5×4mm²',           unit:'m',    price: 52  },
+    { id:'kabel_6',     icon:'🔌', name:'Kabel 3-fas 5×6mm²',           unit:'m',    price: 78  },
+    { id:'uttag_dubbel',icon:'🔲', name:'Dubbeluttag inkl. dosa',        unit:'st',   price: 320 },
+    { id:'uttag_jord',  icon:'🔲', name:'Jordat uttag IP44',             unit:'st',   price: 420 },
+    { id:'brytare',     icon:'🔲', name:'Strömbrytare enkelpol',         unit:'st',   price: 260 },
+    { id:'jfb',         icon:'⚡', name:'Jordfelsbrytare 25A',           unit:'st',   price: 820 },
+    { id:'automat',     icon:'⚡', name:'Automatsäkring 16A',            unit:'st',   price: 150 },
+    { id:'led_spot',    icon:'💡', name:'LED-spotlight 7W inkl. lampa',  unit:'st',   price: 480 },
+    { id:'armatur_tak', icon:'💡', name:'LED-armatur tak',               unit:'st',   price:1200 },
+    { id:'laddbox',     icon:'🔋', name:'Laddbox EV 11kW typ 2',        unit:'st',   price:12500},
+    { id:'elcentral',   icon:'⚡', name:'Elcentral 12-pol 3-fas',        unit:'st',   price:8500 },
+    { id:'rorkran',     icon:'🔌', name:'Rörledningskabel FXP 3G2,5',   unit:'m',    price: 42  },
+    { id:'elmatar',     icon:'⚡', name:'Elmätarskåp utomhus',           unit:'st',   price:6500 },
+  ],
+  vvs: [
+    { id:'pex_15',        icon:'🔧', name:'PEX-rör 15mm',               unit:'m',    price: 38  },
+    { id:'pex_22',        icon:'🔧', name:'PEX-rör 22mm',               unit:'m',    price: 55  },
+    { id:'koppar_15',     icon:'🔧', name:'Kopparrör 15mm',             unit:'m',    price: 85  },
+    { id:'koppar_22',     icon:'🔧', name:'Kopparrör 22mm',             unit:'m',    price: 130 },
+    { id:'avlopp_75',     icon:'🔧', name:'PVC avloppsrör 75mm',        unit:'m',    price: 72  },
+    { id:'avlopp_110',    icon:'🔧', name:'PVC avloppsrör 110mm',       unit:'m',    price: 115 },
+    { id:'toalett',       icon:'🚽', name:'Toalett komplett set',        unit:'st',   price:4800 },
+    { id:'duschblandare', icon:'🚿', name:'Duschblandare termostat',     unit:'st',   price:4200 },
+    { id:'blandare_disk', icon:'🚰', name:'Blandare diskho',             unit:'st',   price:2400 },
+    { id:'blandare_bad',  icon:'🚰', name:'Blandare badkar/handfat',     unit:'st',   price:2800 },
+    { id:'vvb_200',       icon:'🌡️', name:'Varmvattenberedare 200L',    unit:'st',   price:13500},
+    { id:'tatskikt',      icon:'🛡️', name:'Tätskikt Weber.sys 822',      unit:'m²',   price: 360 },
+    { id:'golvbrunn',     icon:'⭕', name:'Golvbrunn inkl. klämring',    unit:'st',   price: 850 },
+    { id:'kulventil',     icon:'🔩', name:'Kulventil 1"',                unit:'st',   price: 480 },
+    { id:'varmepump_ll',  icon:'❄️', name:'Värmepump luft/luft 7kW',    unit:'st',   price:28000},
+    { id:'varmepump_lv',  icon:'❄️', name:'Värmepump luft/vatten 8kW',  unit:'st',   price:48000},
+    { id:'golvvarme',     icon:'🌡️', name:'Golvvärme el (kabel)',        unit:'m²',   price: 420 },
+  ],
+  mark: [
+    { id:'grus',        icon:'⬛', name:'Grus/makadam (levererad)',     unit:'ton',  price: 420 },
+    { id:'sand',        icon:'🟡', name:'Sand (levererad)',             unit:'ton',  price: 340 },
+    { id:'asfalt',      icon:'⬛', name:'Asfalt (levererad)',           unit:'ton',  price:1300 },
+    { id:'betongsten',  icon:'🔲', name:'Betongmarksten 200×200mm',    unit:'m²',   price: 280 },
+    { id:'natursten',   icon:'🪨', name:'Natursten (kalksten)',         unit:'m²',   price: 850 },
+    { id:'dran_ror',    icon:'🔵', name:'Dräneringsrör 100mm',         unit:'m',    price: 75  },
+    { id:'fiberduk',    icon:'⬜', name:'Fiberduk (per m²)',            unit:'m²',   price: 24  },
+    { id:'container',   icon:'📦', name:'Container 6m³ per vecka',     unit:'vecka',price:1200 },
+    { id:'container_sm',icon:'📦', name:'Container 3m³',               unit:'st',   price: 750 },
+    { id:'gravmaskin',  icon:'🚜', name:'Grävmaskin inkl. förare',      unit:'tim',  price:1350 },
+    { id:'lastbil',     icon:'🚚', name:'Lastbil med dump',             unit:'tim',  price:1100 },
+  ],
+  maleri: [
+    { id:'inomhusfarg',  icon:'🖌️', name:'Inomhusfärg (standard)',      unit:'L',    price: 120 },
+    { id:'inomhusfarg_p',icon:'🖌️', name:'Inomhusfärg (premium/Alcro)', unit:'L',    price: 185 },
+    { id:'utomhusfarg',  icon:'🖌️', name:'Utomhusfärg (täckande)',       unit:'L',    price: 150 },
+    { id:'fasadfarg',    icon:'🖌️', name:'Fasadfärg silikat',            unit:'L',    price: 220 },
+    { id:'grund',        icon:'🖌️', name:'Grundfärg',                   unit:'L',    price: 110 },
+    { id:'tapet_standard',icon:'📜',name:'Tapet (standard)',             unit:'rulle',price: 320 },
+    { id:'tapet_design', icon:'📜', name:'Tapet (design/premium)',       unit:'rulle',price: 680 },
+    { id:'spackel',      icon:'🔲', name:'Spackel 5kg',                  unit:'hink', price: 220 },
+    { id:'avmask',       icon:'🎀', name:'Avmaskningssejp 50m',          unit:'rulle',price: 78  },
+    { id:'skyddsplast',  icon:'🎀', name:'Skyddsplast 4×25m',            unit:'rl',   price: 145 },
+    { id:'stall_vecka',  icon:'🪜', name:'Ställning hyra (per vecka)',   unit:'vecka',price:3800 },
+  ],
+  ovrigt: [
+    { id:'h_snickare',     icon:'⏱️', name:'Snickare timkostnad',        unit:'tim',  price: 795 },
+    { id:'h_elektriker',   icon:'⏱️', name:'Elektriker timkostnad',      unit:'tim',  price: 895 },
+    { id:'h_rormoakre',    icon:'⏱️', name:'Rörmokare timkostnad',       unit:'tim',  price: 860 },
+    { id:'h_malare',       icon:'⏱️', name:'Målare timkostnad',          unit:'tim',  price: 780 },
+    { id:'h_markarbetare', icon:'⏱️', name:'Markarbetare timkostnad',    unit:'tim',  price: 780 },
+    { id:'utkorning',      icon:'🚚', name:'Utkörningsavgift',            unit:'st',   price: 650 },
+    { id:'restid',         icon:'🚗', name:'Restid/milersättning',        unit:'mil',  price: 28  },
+  ]
 };
 const PCAT_LABELS = {
   bygg: '🏗️ Bygg',
@@ -6421,7 +6153,7 @@ function addTimerToQuote(id) {
   }
   const q = quotes.find(x => x.id == id);
   if (!q) return;
-  const cost = hrs * (parseFloat(settings.hourly) || 695);
+  const cost = hrs * (parseFloat(settings.hourly) || 795);
   if (!q.extraLines) q.extraLines = [];
   q.extraLines.push({
     label: `Extra arbete (${fmtTime(timerElapsed)})`,
