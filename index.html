@@ -698,6 +698,36 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .quota-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--a),var(--a2));transition:width 0.4s ease}
 .quota-fill.warn{background:linear-gradient(90deg,var(--red),#e88)}
 
+/* ── LANDING PAGE ── */
+#scr-landing{font-size:16px}
+.ld-wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+.ld-hero{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;padding:100px 24px 80px;max-width:1200px;margin:0 auto}
+.ld-stats{display:grid;grid-template-columns:repeat(4,1fr)}
+.ld-feat-row{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;margin-bottom:80px}
+.ld-feat-row.rev{direction:rtl}.ld-feat-row.rev>*{direction:ltr}
+.ld-cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.ld-plans{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+.ld-reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.ld-phone{display:flex;justify-content:center;align-items:center;position:relative}
+@media(max-width:900px){
+  .ld-hero{grid-template-columns:1fr;gap:48px;padding:64px 20px 48px;text-align:center}
+  .ld-phone{display:none}
+  .ld-stats{grid-template-columns:repeat(2,1fr)}
+  .ld-feat-row{grid-template-columns:1fr;gap:32px}
+  .ld-feat-row.rev{direction:ltr}
+  .ld-cards3{grid-template-columns:1fr}
+  .ld-plans{grid-template-columns:1fr;gap:16px}
+  .ld-reviews{grid-template-columns:1fr}
+  .ld-hero h1{font-size:clamp(36px,10vw,54px)!important}
+  .ld-cta-btns{justify-content:center!important}
+  .ld-trust{justify-content:center!important}
+  .ld-plan-pro{margin-top:0!important;margin-bottom:0!important}
+}
+@media(max-width:600px){
+  .ld-stats{grid-template-columns:1fr 1fr}
+  .ld-wrap{padding:0 16px}
+}
+
 </style>
 </head>
 <body>
@@ -732,7 +762,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <!-- Ambient glows -->
     <div style="position:absolute;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(232,184,75,0.055),transparent 55%);top:-300px;left:-200px;pointer-events:none"></div>
     <div style="position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(90,142,200,0.04),transparent 60%);bottom:-200px;right:-100px;pointer-events:none"></div>
-    <div style="max-width:1200px;margin:0 auto;padding:100px 32px 80px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center">
+    <div class="ld-hero">
       <!-- Left: text -->
       <div>
         <div style="display:inline-flex;align-items:center;gap:7px;background:var(--a3);border:1px solid var(--br2);border-radius:30px;padding:5px 16px;font-size:11px;font-weight:700;color:var(--a);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:28px">⚡ AI-offert på 60 sekunder</div>
@@ -742,16 +772,16 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <p style="font-size:18px;color:var(--t3);line-height:1.75;margin-bottom:36px;max-width:460px">
           Byggd för snickare, elektriker, rörmokare och målare. Gör en komplett professionell offert direkt på plats — utan papper, utan dator.
         </p>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:32px">
+        <div class="ld-cta-btns" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:32px">
           <button onclick="showRegisterFromLanding()" style="padding:16px 32px;border-radius:12px;background:var(--a);border:none;color:var(--bg);font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 28px rgba(232,184,75,0.28)">Testa gratis — inga kreditkort →</button>
           <button onclick="showLoginFromLanding()" style="padding:16px 24px;border-radius:12px;background:var(--s2);border:1px solid var(--br);color:var(--t2);font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer">Logga in</button>
         </div>
-        <div style="display:flex;gap:20px;font-size:12px;color:var(--t3)">
+        <div class="ld-trust" style="display:flex;gap:20px;font-size:12px;color:var(--t3)">
           <span>✓ Gratis att testa</span><span>✓ Ingen bindningstid</span><span>✓ Avsluta när du vill</span>
         </div>
       </div>
       <!-- Right: phone mockup -->
-      <div style="display:flex;justify-content:center;align-items:center;position:relative">
+      <div class="ld-phone">
         <!-- Glow behind phone -->
         <div style="position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(232,184,75,0.12),transparent 60%);pointer-events:none"></div>
         <!-- Phone frame -->
@@ -829,7 +859,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
   <!-- ── STATS BAR ── -->
   <section style="border-top:1px solid var(--br);border-bottom:1px solid var(--br);background:var(--s1)">
-    <div style="max-width:1200px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:repeat(4,1fr);gap:0">
+    <div class="ld-wrap ld-stats" style="gap:0">
       <div style="padding:28px 24px;text-align:center;border-right:1px solid var(--br)">
         <div style="font-family:var(--mono);font-size:32px;font-weight:500;color:var(--a);margin-bottom:4px">60 sek</div>
         <div style="font-size:12px;color:var(--t3)">Genomsnittlig tid per offert</div>
@@ -851,7 +881,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
   <!-- ── FEATURES ── -->
   <section id="land-feat" style="background:var(--bg);padding:100px 0">
-    <div style="max-width:1200px;margin:0 auto;padding:0 32px">
+    <div class="ld-wrap">
       <div style="text-align:center;margin-bottom:64px">
         <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">Funktioner</div>
         <div style="font-family:var(--serif);font-size:clamp(32px,3.5vw,48px);line-height:1.15;margin-bottom:14px">Allt du behöver. <em style="font-style:italic;color:var(--a)">Inget du inte gör.</em></div>
@@ -859,7 +889,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       </div>
 
       <!-- Feature row 1: text left, visual right -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;margin-bottom:80px">
+      <div class="ld-feat-row">
         <div>
           <div style="display:inline-block;background:var(--a3);border:1px solid var(--br2);border-radius:10px;padding:10px 14px;font-size:28px;margin-bottom:20px">⚡</div>
           <h3 style="font-family:var(--serif);font-size:32px;line-height:1.2;margin-bottom:12px;color:var(--t1)">Offert på <em style="font-style:italic;color:var(--a)">60 sekunder</em></h3>
@@ -895,7 +925,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       </div>
 
       <!-- Feature row 2: visual left, text right -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;margin-bottom:80px">
+      <div class="ld-feat-row rev">
         <div style="background:var(--s1);border:1px solid var(--br);border-radius:20px;padding:28px;position:relative;overflow:hidden">
           <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--a),transparent)"></div>
           <!-- Mini PDF preview -->
@@ -934,7 +964,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       </div>
 
       <!-- Feature cards row -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+      <div class="ld-cards3">
         <div style="background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:24px">
           <div style="font-size:28px;margin-bottom:12px">🤖</div>
           <div style="font-size:15px;font-weight:700;margin-bottom:6px;color:var(--t1)">AI-beskrivningar</div>
@@ -956,12 +986,12 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
   <!-- ── TESTIMONIALS ── -->
   <section style="background:var(--s1);padding:100px 0;border-top:1px solid var(--br);border-bottom:1px solid var(--br)">
-    <div style="max-width:1200px;margin:0 auto;padding:0 32px">
+    <div class="ld-wrap">
       <div style="text-align:center;margin-bottom:56px">
         <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">Från hantverkare</div>
         <div style="font-family:var(--serif);font-size:clamp(30px,3vw,44px);line-height:1.15">De sparar <em style="font-style:italic;color:var(--a)">timmar varje dag</em></div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+      <div class="ld-reviews">
         <div style="background:var(--bg);border:1px solid var(--br);border-radius:18px;padding:28px">
           <div style="display:flex;gap:3px;margin-bottom:14px">★★★★★</div>
           <p style="font-size:15px;color:var(--t2);line-height:1.75;font-style:italic;margin-bottom:20px">"Jag gör offerter direkt hos kunden nu. Sparar mig minst 2 timmar om dagen och vinner klart fler jobb än innan."</p>
@@ -992,13 +1022,13 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
   <!-- ── PRICING ── -->
   <section id="land-pris" style="background:var(--bg);padding:100px 0">
-    <div style="max-width:1200px;margin:0 auto;padding:0 32px">
+    <div class="ld-wrap">
       <div style="text-align:center;margin-bottom:56px">
         <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">Prissättning</div>
         <div style="font-family:var(--serif);font-size:clamp(32px,3.5vw,48px);line-height:1.15;margin-bottom:10px">Enkelt och <em style="font-style:italic;color:var(--a)">transparent</em></div>
         <div style="font-size:15px;color:var(--t3)">Ingen bindningstid · Avsluta närsomhelst</div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start">
+      <div class="ld-plans">
         <!-- Starter -->
         <div style="background:var(--s1);border:1px solid var(--br);border-radius:22px;padding:32px">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--t3);margin-bottom:14px">Starter</div>
@@ -1016,7 +1046,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
           <button onclick="showRegisterFromLanding()" style="width:100%;padding:14px;border-radius:12px;background:var(--s3);border:1px solid var(--br);color:var(--t1);font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer">Kom igång →</button>
         </div>
         <!-- Pro (highlighted) -->
-        <div style="background:linear-gradient(145deg,rgba(232,184,75,0.07),rgba(232,184,75,0.02));border:2px solid var(--br2);border-radius:22px;padding:32px;position:relative;margin-top:-16px;margin-bottom:-16px">
+        <div class="ld-plan-pro" style="background:linear-gradient(145deg,rgba(232,184,75,0.07),rgba(232,184,75,0.02));border:2px solid var(--br2);border-radius:22px;padding:32px;position:relative;margin-top:-16px;margin-bottom:-16px">
           <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--a);color:var(--bg);font-size:10px;font-weight:700;padding:4px 16px;border-radius:20px;white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px">Mest populär</div>
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--a);margin-bottom:14px">Pro</div>
           <div style="font-family:var(--mono);font-size:48px;font-weight:500;color:var(--a);line-height:1;margin-bottom:6px">1 999</div>
