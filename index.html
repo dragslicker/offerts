@@ -710,6 +710,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .ld-reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .ld-phone{display:flex;justify-content:center;align-items:center;position:relative}
 @media(max-width:900px){
+  .ld-nav-links{display:none}
   .ld-hero{grid-template-columns:1fr;gap:48px;padding:64px 20px 48px;text-align:center}
   .ld-phone{display:none}
   .ld-stats{grid-template-columns:repeat(2,1fr)}
@@ -746,13 +747,15 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
   <!-- Navbar -->
   <nav style="position:sticky;top:0;z-index:20;background:rgba(14,13,11,0.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--br)">
-    <div style="max-width:1200px;margin:0 auto;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-family:var(--serif);font-size:26px;letter-spacing:-0.5px;color:var(--t1)">Offert<em style="font-style:italic;color:var(--a)">s</em></div>
-      <div style="display:flex;align-items:center;gap:28px">
-        <a href="#feat" onclick="document.getElementById('land-feat').scrollIntoView({behavior:'smooth'});return false" style="font-size:13px;color:var(--t3);text-decoration:none;font-weight:500;cursor:pointer">Funktioner</a>
-        <a href="#pris" onclick="document.getElementById('land-pris').scrollIntoView({behavior:'smooth'});return false" style="font-size:13px;color:var(--t3);text-decoration:none;font-weight:500;cursor:pointer">Priser</a>
-        <button onclick="showLoginFromLanding()" style="padding:8px 18px;border-radius:8px;background:transparent;border:1px solid var(--br);color:var(--t2);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer">Logga in</button>
-        <button onclick="showRegisterFromLanding()" style="padding:8px 18px;border-radius:8px;background:var(--a);border:none;color:var(--bg);font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer">Kom igång gratis →</button>
+    <div style="max-width:1200px;margin:0 auto;padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div style="font-family:var(--serif);font-size:24px;letter-spacing:-0.5px;color:var(--t1);flex-shrink:0">Offert<em style="font-style:italic;color:var(--a)">s</em></div>
+      <div class="ld-nav-links" style="display:flex;align-items:center;gap:24px">
+        <a onclick="document.getElementById('land-feat').scrollIntoView({behavior:'smooth'})" style="font-size:13px;color:var(--t3);text-decoration:none;font-weight:500;cursor:pointer">Funktioner</a>
+        <a onclick="document.getElementById('land-pris').scrollIntoView({behavior:'smooth'})" style="font-size:13px;color:var(--t3);text-decoration:none;font-weight:500;cursor:pointer">Priser</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <button onclick="showLoginFromLanding()" style="padding:8px 14px;border-radius:8px;background:transparent;border:1px solid var(--br);color:var(--t2);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer">Logga in</button>
+        <button onclick="showRegisterFromLanding()" style="padding:8px 14px;border-radius:8px;background:var(--a);border:none;color:var(--bg);font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Kom igång →</button>
       </div>
     </div>
   </nav>
