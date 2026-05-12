@@ -33,12 +33,17 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* ── LOGIN ── */
 #scr-login{display:none;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100svh;padding:40px 20px;background:var(--bg);position:relative;overflow-y:auto;-webkit-overflow-scrolling:touch;position:fixed;inset:0;z-index:100}
-#scr-login::after{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(232,184,75,0.07),transparent 70%);top:-60px;right:-80px;pointer-events:none}
+.login-mobile-hd{display:flex;flex-direction:column;align-items:center;width:100%}
 .login-badge{display:inline-flex;align-items:center;gap:6px;background:var(--a3);border:1px solid var(--br2);border-radius:30px;padding:5px 14px;font-size:11px;font-weight:600;color:var(--a);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:22px}
 .login-wordmark{font-family:var(--serif);font-size:50px;color:var(--t1);line-height:1;margin-bottom:6px;letter-spacing:-1px}
 .login-wordmark em{font-style:italic;color:var(--a)}
 .login-tagline{font-size:13px;color:var(--t3);letter-spacing:0.3px;margin-bottom:30px}
 .login-card{background:var(--s1);border:1px solid var(--br);border-radius:var(--r2);padding:26px 22px;width:100%}
+/* Desktop split */
+.login-split{display:contents}
+.login-left{display:none}
+.login-right{width:100%}
+.login-right-title,.login-right-sub{display:none}
 .seg-ctrl{display:flex;background:var(--bg);border-radius:10px;padding:3px;margin-bottom:20px;gap:3px}
 .seg-btn{flex:1;padding:9px;text-align:center;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--t3);transition:all 0.2s;border:none;background:none;font-family:var(--sans)}
 .seg-btn.active{background:var(--s3);color:var(--t1)}
@@ -546,13 +551,40 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     padding-bottom:40px;
   }
 
-  /* Login centered on desktop */
+  /* Login split-screen on desktop */
   #scr-login{
-    margin-left:0;max-width:100%;
-    justify-content:center;
-    background:var(--bg);
+    flex-direction:row;padding:0;align-items:stretch;
+    overflow:hidden;background:var(--bg);
   }
-  #scr-login .login-card{max-width:420px}
+  .login-mobile-hd{display:none}
+  .login-split{display:contents}
+  .login-left{
+    display:flex;flex:1;flex-direction:column;justify-content:center;
+    padding:56px 56px;position:relative;overflow:hidden;
+    background:linear-gradient(145deg,#161512 0%,#0E0D0B 100%);
+    border-right:1px solid var(--br);
+  }
+  .login-left::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(232,184,75,0.07),transparent 55%);top:-150px;right:-150px;pointer-events:none}
+  .login-left::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(90,142,200,0.05),transparent 60%);bottom:-100px;left:-100px;pointer-events:none}
+  .ll-logo{font-family:var(--serif);font-size:30px;letter-spacing:-0.5px;color:var(--t1);margin-bottom:56px}
+  .ll-logo em{font-style:italic;color:var(--a)}
+  .ll-hero{font-family:var(--serif);font-size:clamp(36px,3.5vw,52px);line-height:1.15;color:var(--t1);margin-bottom:16px}
+  .ll-hero em{font-style:italic;color:var(--a)}
+  .ll-sub{font-size:16px;color:var(--t3);line-height:1.7;max-width:420px;margin-bottom:40px}
+  .ll-feats{display:flex;flex-direction:column;gap:14px;margin-bottom:44px}
+  .ll-feat{display:flex;align-items:center;gap:14px;font-size:14px;color:var(--t2)}
+  .ll-feat-icon{width:36px;height:36px;border-radius:10px;background:var(--a3);border:1px solid var(--br2);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+  .ll-quote{background:var(--s2);border:1px solid var(--br);border-left:3px solid var(--a);border-radius:0 12px 12px 0;padding:16px 20px;max-width:420px}
+  .ll-quote p{font-size:13px;color:var(--t2);line-height:1.6;font-style:italic}
+  .ll-quote-by{font-size:11px;color:var(--t3);font-weight:700;margin-top:8px}
+  .login-right{
+    width:480px;flex-shrink:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:48px 40px;overflow-y:auto;
+    background:var(--s1);
+  }
+  .login-right .login-card{max-width:400px;width:100%;border:none;background:transparent;padding:0}
+  .login-right-title,.login-right-sub{display:block}
 
   /* Onboarding centered */
   #scr-onboarding{margin-left:0;max-width:100%}
@@ -680,56 +712,176 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
 <!-- ══ LANDNINGSSIDA ══ -->
-<div id="scr-landing" style="display:none;min-height:100svh;background:var(--bg);overflow-y:auto">
-  <div style="max-width:900px;margin:0 auto;padding:40px 24px 80px">
-    <!-- Nav -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:60px">
-      <div style="font-family:var(--serif);font-size:28px;letter-spacing:-0.5px">Offert<em style="font-style:italic;color:var(--a)">s</em></div>
-      <button onclick="showLoginFromLanding()" style="padding:10px 22px;border-radius:10px;background:var(--a);border:none;color:var(--bg);font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer">Logga in</button>
+<div id="scr-landing" style="display:none;min-height:100svh;background:var(--bg);overflow-y:auto;position:fixed;inset:0;z-index:90">
+  <!-- Sticky Navbar -->
+  <nav style="position:sticky;top:0;z-index:10;background:rgba(14,13,11,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--br);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;max-width:100%">
+    <div style="font-family:var(--serif);font-size:26px;letter-spacing:-0.5px;color:var(--t1)">Offert<em style="font-style:italic;color:var(--a)">s</em></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onclick="showLoginFromLanding()" style="padding:9px 18px;border-radius:9px;background:transparent;border:1px solid var(--br);color:var(--t2);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='var(--br2)';this.style.color='var(--t1)'" onmouseout="this.style.borderColor='var(--br)';this.style.color='var(--t2)'">Logga in</button>
+      <button onclick="showRegisterFromLanding()" style="padding:9px 18px;border-radius:9px;background:var(--a);border:none;color:var(--bg);font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer">Kom igång →</button>
     </div>
+  </nav>
+
+  <div style="max-width:1080px;margin:0 auto;padding:0 24px 100px">
+
     <!-- Hero -->
-    <div style="text-align:center;margin-bottom:64px">
-      <div style="font-family:var(--serif);font-size:clamp(36px,6vw,64px);line-height:1.15;margin-bottom:20px">
-        Professionella offerter<br><em style="font-style:italic;color:var(--a)">på 60 sekunder</em>
+    <div style="text-align:center;padding:80px 0 72px;position:relative">
+      <div style="position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(232,184,75,0.06),transparent 55%);top:-200px;left:50%;transform:translateX(-50%);pointer-events:none"></div>
+      <div style="display:inline-flex;align-items:center;gap:6px;background:var(--a3);border:1px solid var(--br2);border-radius:30px;padding:5px 16px;font-size:11px;font-weight:700;color:var(--a);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:28px">⚡ Nytt 2025 — AI-offert på 60 sekunder</div>
+      <div style="font-family:var(--serif);font-size:clamp(40px,6vw,72px);line-height:1.1;margin-bottom:22px;color:var(--t1)">
+        Offert klar <em style="font-style:italic;color:var(--a)">innan kunden</em><br>hunnit fika klart
       </div>
-      <p style="font-size:18px;color:var(--t3);max-width:500px;margin:0 auto 32px;line-height:1.7">
-        Byggd för snickare, elektriker, rörmokare och målare. Gör en offert direkt hos kunden — utan krångel.
+      <p style="font-size:18px;color:var(--t3);max-width:540px;margin:0 auto 36px;line-height:1.7">
+        Byggd för snickare, elektriker, rörmokare och målare. Gör en professionell offert direkt hos kunden — utan krångel.
       </p>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <button onclick="showRegisterFromLanding()" style="padding:16px 32px;border-radius:14px;background:var(--a);border:none;color:var(--bg);font-family:var(--sans);font-size:16px;font-weight:700;cursor:pointer">Testa gratis →</button>
-        <button onclick="showLoginFromLanding()" style="padding:16px 32px;border-radius:14px;background:var(--s2);border:1px solid var(--br);color:var(--t2);font-family:var(--sans);font-size:16px;font-weight:600;cursor:pointer">Logga in</button>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:40px">
+        <button onclick="showRegisterFromLanding()" style="padding:16px 36px;border-radius:14px;background:var(--a);border:none;color:var(--bg);font-family:var(--sans);font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 24px rgba(232,184,75,0.25)">Testa gratis — inga kreditkort →</button>
+        <button onclick="showLoginFromLanding()" style="padding:16px 28px;border-radius:14px;background:var(--s2);border:1px solid var(--br);color:var(--t2);font-family:var(--sans);font-size:16px;font-weight:600;cursor:pointer">Logga in</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:20px;font-size:12px;color:var(--t3)">
+        <span>✓ Gratis att testa</span>
+        <span style="color:var(--t3)">·</span>
+        <span>✓ Ingen bindningstid</span>
+        <span style="color:var(--t3)">·</span>
+        <span>✓ Avsluta när du vill</span>
       </div>
     </div>
-    <!-- Features -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:60px">
-      <div style="background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:24px">
-        <div style="font-size:32px;margin-bottom:12px">⚡</div>
-        <div style="font-size:16px;font-weight:700;margin-bottom:6px">60 sekunder</div>
-        <div style="font-size:13px;color:var(--t3);line-height:1.6">Välj projekt, fyll i mått och material. Offerten är klar innan kunden hunnit fika klart.</div>
+
+    <!-- Feature grid -->
+    <div style="margin-bottom:80px">
+      <div style="text-align:center;margin-bottom:40px">
+        <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">Vad ingår</div>
+        <div style="font-family:var(--serif);font-size:clamp(28px,3vw,40px);line-height:1.2">Allt du behöver för <em style="font-style:italic;color:var(--a)">professionella offerter</em></div>
       </div>
-      <div style="background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:24px">
-        <div style="font-size:32px;margin-bottom:12px">📄</div>
-        <div style="font-size:16px;font-weight:700;margin-bottom:6px">Snygg PDF</div>
-        <div style="font-size:13px;color:var(--t3);line-height:1.6">Med din logotyp och accentfärg. Skicka direkt via SMS, WhatsApp eller e-post.</div>
-      </div>
-      <div style="background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:24px">
-        <div style="font-size:32px;margin-bottom:12px">🤖</div>
-        <div style="font-size:16px;font-weight:700;margin-bottom:6px">AI-beskrivningar</div>
-        <div style="font-size:13px;color:var(--t3);line-height:1.6">AI skriver en professionell sammanfattning av jobbet automatiskt — på svenska.</div>
-      </div>
-      <div style="background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:24px">
-        <div style="font-size:32px;margin-bottom:12px">✍️</div>
-        <div style="font-size:16px;font-weight:700;margin-bottom:6px">Digital signering</div>
-        <div style="font-size:13px;color:var(--t3);line-height:1.6">Kunden signerar direkt på skärmen eller via länk. Offerten sparas med datum och signatur.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+        <div style="background:var(--s1);border:1px solid var(--br);border-radius:18px;padding:28px;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--br2)'" onmouseout="this.style.borderColor='var(--br)'">
+          <div style="font-size:36px;margin-bottom:14px">⚡</div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:8px;color:var(--t1)">60 sekunder</div>
+          <div style="font-size:13px;color:var(--t3);line-height:1.7">Välj projekt, fyll i mått och material. Offerten är klar innan kunden hunnit dricka upp kaffet.</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--br);border-radius:18px;padding:28px;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--br2)'" onmouseout="this.style.borderColor='var(--br)'">
+          <div style="font-size:36px;margin-bottom:14px">📄</div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:8px;color:var(--t1)">Snygg PDF</div>
+          <div style="font-size:13px;color:var(--t3);line-height:1.7">Med din logotyp och accentfärg. Skicka direkt via SMS, WhatsApp eller e-post från telefonen.</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--br);border-radius:18px;padding:28px;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--br2)'" onmouseout="this.style.borderColor='var(--br)'">
+          <div style="font-size:36px;margin-bottom:14px">🤖</div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:8px;color:var(--t1)">AI-beskrivningar</div>
+          <div style="font-size:13px;color:var(--t3);line-height:1.7">AI skriver en professionell sammanfattning av jobbet automatiskt — på svenska, anpassad efter ditt yrke.</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--br);border-radius:18px;padding:28px;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--br2)'" onmouseout="this.style.borderColor='var(--br)'">
+          <div style="font-size:36px;margin-bottom:14px">✍️</div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:8px;color:var(--t1)">Digital signering</div>
+          <div style="font-size:13px;color:var(--t3);line-height:1.7">Kunden signerar direkt på skärmen eller via länk. Offerten sparas med datum, signatur och IP-adress.</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--br);border-radius:18px;padding:28px;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--br2)'" onmouseout="this.style.borderColor='var(--br)'">
+          <div style="font-size:36px;margin-bottom:14px">📸</div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:8px;color:var(--t1)">Jobbfoton</div>
+          <div style="font-size:13px;color:var(--t3);line-height:1.7">Ta kort på jobbet och bifoga i offerten. Kunden ser exakt vad de betalar för.</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--br);border-radius:18px;padding:28px;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--br2)'" onmouseout="this.style.borderColor='var(--br)'">
+          <div style="font-size:36px;margin-bottom:14px">📊</div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:8px;color:var(--t1)">Statistik</div>
+          <div style="font-size:13px;color:var(--t3);line-height:1.7">Följ vinstgrad, omsättning och offertstatus. Se vilket yrke som ger mest intäkter.</div>
+        </div>
       </div>
     </div>
-    <!-- Pricing teaser -->
-    <div style="background:var(--s1);border:1px solid var(--br);border-radius:20px;padding:32px;text-align:center">
-      <div style="font-size:13px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px">Prissättning</div>
-      <div style="font-family:var(--mono);font-size:36px;font-weight:500;color:var(--a);margin-bottom:4px">999 kr</div>
-      <div style="font-size:13px;color:var(--t3);margin-bottom:24px">per månad · ingen bindningstid</div>
-      <button onclick="showRegisterFromLanding()" style="padding:14px 28px;border-radius:12px;background:var(--a);border:none;color:var(--bg);font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer">Kom igång gratis →</button>
+
+    <!-- Testimonials -->
+    <div style="margin-bottom:80px">
+      <div style="text-align:center;margin-bottom:36px">
+        <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">Vad hantverkare säger</div>
+        <div style="font-family:var(--serif);font-size:clamp(24px,2.5vw,36px)">De sparar <em style="font-style:italic;color:var(--a)">timmar varje dag</em></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+        <div style="background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:24px">
+          <div style="font-size:20px;color:var(--a);margin-bottom:10px">★★★★★</div>
+          <p style="font-size:14px;color:var(--t2);line-height:1.7;font-style:italic;margin-bottom:16px">"Jag gör offerter direkt hos kunden nu. Sparar mig minst 2 timmar om dagen — och vinner fler jobb."</p>
+          <div style="font-size:12px;font-weight:700;color:var(--t1)">Johan S.</div>
+          <div style="font-size:11px;color:var(--t3)">Elektriker · Stockholm</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:24px">
+          <div style="font-size:20px;color:var(--a);margin-bottom:10px">★★★★★</div>
+          <p style="font-size:14px;color:var(--t2);line-height:1.7;font-style:italic;margin-bottom:16px">"Kunden fick sin offert på 3 minuter. De ringde tillbaka och tackade ja redan nästa dag. Aldrig gått så snabbt."</p>
+          <div style="font-size:12px;font-weight:700;color:var(--t1)">Maria K.</div>
+          <div style="font-size:11px;color:var(--t3)">Målare · Göteborg</div>
+        </div>
+        <div style="background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:24px">
+          <div style="font-size:20px;color:var(--a);margin-bottom:10px">★★★★★</div>
+          <p style="font-size:14px;color:var(--t2);line-height:1.7;font-style:italic;margin-bottom:16px">"Professionella PDFer med min logga. Mina kunder tror jag har en hel kontorsavdelning bakom mig."</p>
+          <div style="font-size:12px;font-weight:700;color:var(--t1)">Anders B.</div>
+          <div style="font-size:11px;color:var(--t3)">Snickare · Malmö</div>
+        </div>
+      </div>
     </div>
+
+    <!-- Pricing -->
+    <div style="margin-bottom:80px" id="landing-pricing">
+      <div style="text-align:center;margin-bottom:40px">
+        <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">Prissättning</div>
+        <div style="font-family:var(--serif);font-size:clamp(28px,3vw,40px);margin-bottom:8px">Enkelt och <em style="font-style:italic;color:var(--a)">transparent</em></div>
+        <div style="font-size:14px;color:var(--t3)">Ingen bindningstid · Avsluta när du vill</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;max-width:900px;margin:0 auto">
+        <!-- Starter -->
+        <div style="background:var(--s1);border:1px solid var(--br);border-radius:20px;padding:28px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--t3);margin-bottom:12px">Starter</div>
+          <div style="font-family:var(--mono);font-size:40px;font-weight:500;color:var(--t1);margin-bottom:4px">999 <span style="font-size:16px;color:var(--t3)">kr/mån</span></div>
+          <div style="font-size:12px;color:var(--t3);margin-bottom:24px">Perfekt för den enskilda hantverkaren</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px">
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> 20 offerter per månad</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> 3 användare</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> PDF-generering</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> Digital signering</div>
+          </div>
+          <button onclick="showRegisterFromLanding()" style="width:100%;padding:13px;border-radius:11px;background:var(--s3);border:1px solid var(--br);color:var(--t1);font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer">Kom igång →</button>
+        </div>
+        <!-- Pro -->
+        <div style="background:linear-gradient(145deg,rgba(232,184,75,0.06),rgba(232,184,75,0.02));border:1.5px solid var(--br2);border-radius:20px;padding:28px;position:relative">
+          <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--a);color:var(--bg);font-size:10px;font-weight:700;padding:4px 14px;border-radius:20px;white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px">Mest populär</div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--a);margin-bottom:12px">Pro</div>
+          <div style="font-family:var(--mono);font-size:40px;font-weight:500;color:var(--a);margin-bottom:4px">1 999 <span style="font-size:16px;color:var(--t3)">kr/mån</span></div>
+          <div style="font-size:12px;color:var(--t3);margin-bottom:24px">För proffs som vill växa</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px">
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> Obegränsade offerter</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> 10 användare</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> AI-beskrivningar</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> Prioriterad support</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> Allt i Starter</div>
+          </div>
+          <button onclick="showRegisterFromLanding()" style="width:100%;padding:13px;border-radius:11px;background:var(--a);border:none;color:var(--bg);font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(232,184,75,0.25)">Välj Pro →</button>
+        </div>
+        <!-- Enterprise -->
+        <div style="background:var(--s1);border:1px solid var(--br);border-radius:20px;padding:28px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--pur);margin-bottom:12px">Enterprise</div>
+          <div style="font-family:var(--mono);font-size:40px;font-weight:500;color:var(--t1);margin-bottom:4px">4 999 <span style="font-size:16px;color:var(--t3)">kr/mån</span></div>
+          <div style="font-size:12px;color:var(--t3);margin-bottom:24px">För företag med många hantverkare</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px">
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> Obegränsade offerter</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> 50+ användare</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> Anpassad branding</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> Dedikerad kundansvarig</div>
+            <div style="font-size:13px;color:var(--t2);display:flex;gap:10px"><span style="color:var(--grn)">✓</span> Allt i Pro</div>
+          </div>
+          <button onclick="showRegisterFromLanding()" style="width:100%;padding:13px;border-radius:11px;background:var(--s3);border:1px solid var(--br);color:var(--t1);font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer">Kontakta oss →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final CTA -->
+    <div style="background:linear-gradient(135deg,rgba(232,184,75,0.09),rgba(232,184,75,0.03));border:1px solid var(--br2);border-radius:24px;padding:56px 32px;text-align:center;position:relative;overflow:hidden">
+      <div style="position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(232,184,75,0.07),transparent 60%);top:-100px;right:-100px;pointer-events:none"></div>
+      <div style="font-family:var(--serif);font-size:clamp(28px,3.5vw,44px);line-height:1.2;margin-bottom:14px">Redo att spara <em style="font-style:italic;color:var(--a)">timmar varje dag?</em></div>
+      <p style="font-size:16px;color:var(--t3);margin-bottom:32px;max-width:400px;margin-left:auto;margin-right:auto">Kom igång på 2 minuter. Inga kreditkort. Ingen bindningstid.</p>
+      <button onclick="showRegisterFromLanding()" style="padding:18px 40px;border-radius:14px;background:var(--a);border:none;color:var(--bg);font-family:var(--sans);font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 6px 28px rgba(232,184,75,0.3)">Skapa gratis konto →</button>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align:center;padding:40px 0 20px;border-top:1px solid var(--br);margin-top:60px">
+      <div style="font-family:var(--serif);font-size:20px;color:var(--t3);margin-bottom:8px">Offert<em style="font-style:italic;color:var(--a)">s</em></div>
+      <div style="font-size:12px;color:var(--t3)">© 2025 Offerts · Professionella offerter för hantverkare</div>
+    </div>
+
   </div>
 </div>
 
@@ -745,47 +897,60 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   </div>
 </div>
 <div id="scr-login">
-  <div class="login-badge">⚡ Offert på 60 sekunder</div>
-  <div class="login-wordmark">Offert<em>s</em></div>
-  <div class="login-tagline">Bygg, El, VVS & Måleri — offerter direkt på plats</div>
-  <div class="login-card">
-    <div class="seg-ctrl">
-      <button class="seg-btn active" id="tab-login" onclick="switchTab('login')">Logga in</button>
-      <button class="seg-btn" id="tab-reg" onclick="switchTab('reg')">Skapa konto</button>
+  <!-- Mobile header (hidden on desktop) -->
+  <div class="login-mobile-hd">
+    <div class="login-badge">⚡ Offert på 60 sekunder</div>
+    <div class="login-wordmark">Offert<em>s</em></div>
+    <div class="login-tagline">Bygg, El, VVS & Måleri — offerter direkt på plats</div>
+  </div>
+
+  <div class="login-split">
+    <!-- Left: Marketing panel (desktop only) -->
+    <div class="login-left">
+      <div class="ll-logo">Offert<em>s</em></div>
+      <div class="ll-hero">Professionella offerter<br><em>på 60 sekunder</em></div>
+      <p class="ll-sub">Byggd för snickare, elektriker, rörmokare och målare. Gör en komplett offert direkt hos kunden — utan krångel.</p>
+      <div class="ll-feats">
+        <div class="ll-feat"><div class="ll-feat-icon">⚡</div>Klar på under 60 sekunder</div>
+        <div class="ll-feat"><div class="ll-feat-icon">📄</div>Snygg PDF med din logotyp och färg</div>
+        <div class="ll-feat"><div class="ll-feat-icon">🤖</div>AI skriver beskrivningen åt dig</div>
+        <div class="ll-feat"><div class="ll-feat-icon">✍️</div>Digital signering direkt på plats</div>
+        <div class="ll-feat"><div class="ll-feat-icon">☁️</div>Synkad i molnet — alltid tillgänglig</div>
+      </div>
+      <div class="ll-quote">
+        <p>"Jag gör offerter direkt hos kunden nu. Sparar mig minst 2 timmar om dagen."</p>
+        <div class="ll-quote-by">— Johan S., Elektriker · Stockholm</div>
+      </div>
     </div>
-    <div id="login-form">
-      <div class="ff"><label>E-post</label><input type="email" id="l-email" placeholder="din@email.se"></div>
-      <div class="ff"><label>Lösenord</label><input type="password" id="l-pw" placeholder="••••••••"></div>
-      <button class="btn primary" onclick="doLogin()">Logga in</button>
-      <div class="divider-or">eller</div>
-      <button class="social-btn" onclick="doLogin()">🍎 Fortsätt med Apple</button>
-      <button class="social-btn" onclick="doLogin()">🔵 Fortsätt med Google</button>
-      <p class="already">Inget konto? <span onclick="switchTab('reg')">Registrera dig gratis</span></p>
-    </div>
-    <div id="reg-form" style="display:none">
-      <div class="ff"><label>Företagsnamn</label><input type="text" id="r-company" placeholder="AB Bygg & El"></div>
-      <div class="ff"><label>Ditt namn</label><input type="text" id="r-name" placeholder="Erik Svensson"></div>
-      <div class="ff"><label>E-post</label><input type="email" id="r-email" placeholder="din@email.se"></div>
-      <div class="ff"><label>Lösenord</label><input type="password" id="r-pw" placeholder="Minst 8 tecken"></div>
-      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:10px">Din yrkesroll</div>
-      <div class="prof-grid" id="reg-prof-grid"></div>
-      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.7px;margin:14px 0 10px">Välj plan</div>
-      <div class="plan-cards">
-        <div class="plan-card" id="plan-starter" onclick="selPlan('starter')">
-          <div class="pc-name">Starter</div><div class="pc-price">999 kr</div>
-          <div class="pc-period">/månad</div><div style="font-size:10px;color:var(--t3)">3 användare · 20 offerter</div>
+
+    <!-- Right: Auth form -->
+    <div class="login-right">
+      <div class="login-card">
+        <div style="font-family:var(--serif);font-size:26px;margin-bottom:6px;letter-spacing:-0.3px" class="login-right-title">Välkommen<em style="font-style:italic;color:var(--a)"> tillbaka</em></div>
+        <div style="font-size:13px;color:var(--t3);margin-bottom:24px" class="login-right-sub">Logga in eller skapa ett nytt konto</div>
+        <div class="seg-ctrl">
+          <button class="seg-btn active" id="tab-login" onclick="switchTab('login')">Logga in</button>
+          <button class="seg-btn" id="tab-reg" onclick="switchTab('reg')">Skapa konto</button>
         </div>
-        <div class="plan-card sel" id="plan-pro" onclick="selPlan('pro')">
-          <div class="pc-name">Pro</div><div class="pc-price">1 999 kr</div>
-          <div class="pc-period">/månad</div><span class="pc-badge">Populär</span>
+        <div id="login-form">
+          <div class="ff"><label>E-post</label><input type="email" id="l-email" placeholder="din@email.se"></div>
+          <div class="ff"><label>Lösenord</label><input type="password" id="l-pw" placeholder="••••••••"></div>
+          <button class="btn primary" onclick="doLogin()">Logga in</button>
+          <div class="divider-or">eller</div>
+          <button class="social-btn" onclick="doLogin()">🍎 Fortsätt med Apple</button>
+          <button class="social-btn" onclick="doLogin()">🔵 Fortsätt med Google</button>
+          <p class="already">Inget konto? <span onclick="switchTab('reg')">Registrera dig gratis</span></p>
+        </div>
+        <div id="reg-form" style="display:none">
+          <div class="ff"><label>Företagsnamn</label><input type="text" id="r-company" placeholder="AB Bygg & El"></div>
+          <div class="ff"><label>Ditt namn</label><input type="text" id="r-name" placeholder="Erik Svensson"></div>
+          <div class="ff"><label>E-post</label><input type="email" id="r-email" placeholder="din@email.se"></div>
+          <div class="ff"><label>Lösenord</label><input type="password" id="r-pw" placeholder="Minst 8 tecken"></div>
+          <button class="btn primary" onclick="doRegister()">Skapa konto →</button>
+          <p class="already" style="margin-top:12px">Redan konto? <span onclick="switchTab('login')">Logga in</span></p>
+          <p style="font-size:11px;color:var(--t3);text-align:center;margin-top:10px;line-height:1.5">Gratis att testa · Ingen bindningstid · Välj plan efter registrering</p>
         </div>
       </div>
-      <div style="background:var(--s2);border:1px solid var(--br);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
-        <div><div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px">Enterprise</div><div style="font-size:11px;color:var(--t3);margin-top:2px">50+ användare · allt ingår</div></div>
-        <div style="font-family:var(--mono);font-size:16px;color:var(--t2)">4 999 kr/mån</div>
-      </div>
-      <button class="btn primary" onclick="doRegister()">Skapa konto →</button>
-      <p class="already" style="margin-top:12px">Redan konto? <span onclick="switchTab('login')">Logga in</span></p>
     </div>
   </div>
 </div>
@@ -2033,6 +2198,10 @@ function switchTab(tab) {
   S('tab-reg').classList.toggle('active', tab === 'reg');
   S('login-form').style.display = tab === 'login' ? 'block' : 'none';
   S('reg-form').style.display = tab === 'reg' ? 'block' : 'none';
+  var t = document.querySelector('.login-right-title');
+  var s = document.querySelector('.login-right-sub');
+  if (t) t.innerHTML = tab === 'login' ? 'Välkommen<em style="font-style:italic;color:var(--a)"> tillbaka</em>' : 'Skapa ditt<em style="font-style:italic;color:var(--a)"> konto</em>';
+  if (s) s.textContent = tab === 'login' ? 'Logga in på ditt Offerts-konto' : 'Kom igång gratis — inga kreditkort krävs';
 }
 function selPlan(p) {
   selectedPlan = p;
