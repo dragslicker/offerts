@@ -681,6 +681,56 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .share-ch-info h4{font-size:13px;font-weight:700;color:var(--t1)}
 .share-ch-info p{font-size:11px;color:var(--t3);margin-top:2px}
 
+/* ── PUBLIC QUOTE PAGE (customer view) ── */
+.pub-wrap{min-height:100svh;background:var(--bg);color:var(--t1);font-family:var(--sans);overflow-y:auto;padding-bottom:48px}
+.pub-topbar{padding:20px 20px 16px;max-width:520px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.pub-wordmark{font-family:var(--serif);font-size:22px;letter-spacing:-0.5px}
+.pub-wordmark em{font-style:italic;color:var(--a)}
+.pub-body{max-width:520px;margin:0 auto;padding:0 20px}
+.pub-hero{background:var(--s1);border:1px solid var(--br);border-radius:20px;padding:24px;margin-bottom:14px;position:relative;overflow:hidden}
+.pub-hero::after{content:'';position:absolute;bottom:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(232,184,75,0.07),transparent 60%);pointer-events:none}
+.pub-icon{font-size:44px;display:block;margin-bottom:12px;line-height:1}
+.pub-proj{font-family:var(--serif);font-size:26px;letter-spacing:-0.3px;margin-bottom:4px}
+.pub-meta{font-size:12px;color:var(--t3);margin-bottom:16px}
+.pub-price{font-family:var(--mono);font-size:44px;font-weight:500;color:var(--a);line-height:1}
+.pub-price-note{font-size:11px;color:var(--t3);margin-top:5px}
+.pub-card{background:var(--s1);border:1px solid var(--br);border-radius:16px;padding:18px;margin-bottom:14px}
+.pub-section-lbl{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:12px}
+.pub-line{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(232,184,75,0.06);font-size:13px}
+.pub-line:last-child{border-bottom:none}
+.pub-line-lbl{color:var(--t2)}
+.pub-line-amt{font-family:var(--mono);color:var(--t1)}
+.pub-total-row{display:flex;justify-content:space-between;align-items:center;padding:13px 0 0;margin-top:4px;border-top:1px solid var(--br2);font-size:15px;font-weight:700}
+.pub-total-amt{font-family:var(--mono);font-size:20px;color:var(--a)}
+.pub-desc{font-size:13px;color:var(--t2);line-height:1.75}
+/* CTA block */
+.pub-cta{margin-bottom:14px}
+.pub-validity{text-align:center;font-size:12px;color:var(--t3);margin-bottom:14px;line-height:1.5}
+.pub-note-inp{width:100%;background:var(--s2);border:1px solid var(--br);border-radius:12px;padding:13px 16px;color:var(--t1);font-family:var(--sans);font-size:14px;outline:none;margin-bottom:12px;transition:border-color 0.15s;-webkit-appearance:none}
+.pub-note-inp:focus{border-color:var(--br2)}
+.pub-note-inp::placeholder{color:var(--t3)}
+.pub-accept-btn{width:100%;padding:18px;background:var(--a);border:none;border-radius:14px;font-size:16px;font-weight:700;color:var(--bg);cursor:pointer;font-family:var(--sans);letter-spacing:0.2px;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:9px}
+.pub-accept-btn:active{transform:scale(0.97);background:var(--a2)}
+.pub-accept-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.pub-decline-btn{width:100%;padding:13px;background:none;border:1px solid var(--br);border-radius:12px;font-size:13px;color:var(--t3);cursor:pointer;font-family:var(--sans);margin-top:8px;transition:all 0.15s}
+.pub-decline-btn:active{background:var(--s2)}
+/* Status states */
+.pub-accepted-box{text-align:center;padding:36px 20px;background:rgba(79,175,114,0.07);border:1px solid rgba(79,175,114,0.2);border-radius:20px}
+.pub-accepted-icon{font-size:52px;display:block;margin-bottom:12px}
+.pub-accepted-title{font-size:20px;font-weight:700;color:var(--grn);margin-bottom:6px}
+.pub-accepted-sub{font-size:13px;color:var(--t3);line-height:1.6}
+.pub-declined-box{text-align:center;padding:28px 20px;background:rgba(200,82,82,0.05);border:1px solid rgba(200,82,82,0.15);border-radius:20px}
+.pub-company-footer{text-align:center;font-size:12px;color:var(--t3);margin-top:20px;line-height:1.8}
+/* Loading spinner for share token creation */
+.share-creating{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;gap:16px}
+.share-creating-spinner{width:28px;height:28px;border:2px solid var(--br2);border-top-color:var(--a);border-radius:50%;animation:spin 0.8s linear infinite}
+.share-creating p{font-size:13px;color:var(--t3)}
+/* Accepted badge on share screen */
+.share-accepted-badge{display:flex;align-items:center;gap:10px;padding:14px 16px;background:rgba(79,175,114,0.08);border:1px solid rgba(79,175,114,0.2);border-radius:12px;margin-bottom:12px}
+.sab-icon{font-size:20px;flex-shrink:0}
+.sab-info h4{font-size:13px;font-weight:700;color:var(--grn)}
+.sab-info p{font-size:11px;color:var(--t3);margin-top:2px}
+
 /* ── DIGITAL SIGNING ── */
 .sign-card{background:var(--s1);border:1px solid var(--br);border-radius:18px;padding:24px;margin:0 20px 16px}
 .sign-status{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-size:13px;font-weight:600}
@@ -2023,6 +2073,74 @@ function dbDelete(table, id) {
 }
 
 /* ══════════════════════════════════════
+   PUBLIC QUOTE RESPONSES — token-baserad acceptering
+══════════════════════════════════════ */
+function _publicHeaders() {
+  return { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY };
+}
+function _generateToken() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+function dbCreateShareToken(q) {
+  if (!supaUser) return Promise.resolve(null);
+  var token = _generateToken();
+  var shareData = {
+    qNum: q.qNum, projectName: q.projectName, projectIcon: q.projectIcon,
+    trade: q.trade, custName: q.custName, custEmail: q.custEmail, custPhone: q.custPhone,
+    date: q.date, lines: q.lines, sub: q.sub, rotAmt: q.rotAmt, rotPct: q.rotPct,
+    vat: q.vat, grand: q.grand, vatPct: q.vatPct, aiDesc: q.aiDesc,
+    company: settings.company || '', companyPhone: settings.phone || '',
+    companyEmail: settings.email || '', accentColor: settings.accentColor || '#E8B84B'
+  };
+  return fetch(SUPA_URL + '/rest/v1/quote_responses', {
+    method: 'POST',
+    headers: Object.assign({}, _headers(), { 'Prefer': 'return=minimal' }),
+    body: JSON.stringify({ token: token, user_id: supaUser.id, quote_id: String(q.id), share_data: shareData, status: 'pending', created_at: new Date().toISOString() })
+  }).then(function(r) { return (r.ok || r.status === 201) ? token : null; })
+  .catch(function() { return null; });
+}
+function dbGetPublicQuote(token) {
+  return fetch(SUPA_URL + '/rest/v1/quote_responses?token=eq.' + encodeURIComponent(token) + '&select=token,share_data,status,accepted_at,customer_note', {
+    headers: _publicHeaders()
+  }).then(function(r) { return r.ok ? r.json() : []; })
+  .then(function(rows) { return (rows && rows[0]) ? rows[0] : null; })
+  .catch(function() { return null; });
+}
+function dbAcceptPublicQuote(token, status, note) {
+  var body = { status: status, accepted_at: new Date().toISOString() };
+  if (note) body.customer_note = note;
+  return fetch(SUPA_URL + '/rest/v1/quote_responses?token=eq.' + encodeURIComponent(token), {
+    method: 'PATCH',
+    headers: Object.assign({}, _publicHeaders(), { 'Prefer': 'return=minimal' }),
+    body: JSON.stringify(body)
+  }).then(function(r) { return r.ok || r.status === 204; })
+  .catch(function() { return false; });
+}
+function dbSyncAcceptances() {
+  if (!supaUser) return Promise.resolve();
+  return fetch(SUPA_URL + '/rest/v1/quote_responses?user_id=eq.' + supaUser.id + '&status=neq.pending&select=quote_id,status,accepted_at,customer_note', {
+    headers: _headers()
+  }).then(function(r) { return r.ok ? r.json() : []; })
+  .then(function(rows) {
+    if (!rows || !rows.length) return;
+    var changed = false;
+    rows.forEach(function(row) {
+      var q = quotes.find(function(x) { return String(x.id) === String(row.quote_id); });
+      if (q && q.status !== row.status) {
+        q.status = row.status;
+        if (row.accepted_at) q.acceptedAt = row.accepted_at;
+        if (row.customer_note) q.customerNote = row.customer_note;
+        changed = true;
+      }
+    });
+    if (changed) localStorage.setItem('kly_quotes', JSON.stringify(quotes));
+  }).catch(function() {});
+}
+
+/* ══════════════════════════════════════
    DATA SYNC
 ══════════════════════════════════════ */
 function setSyncState(state) {
@@ -2109,6 +2227,8 @@ function dbLoadAll() {
       accentColor = settings.accentColor || '#E8B84B';
     }
     setSyncState('ok');
+    // Synka kundaccepteringar i bakgrunden
+    dbSyncAcceptances();
   }).catch(function () {
     setSyncState('error');
   });
@@ -6003,60 +6123,103 @@ function openShareScreen(id) {
   const q = quotes.find(x => x.id == id);
   if (!q) return;
   S('share-back').onclick = () => showDetail(id, detailFrom);
-  const fakeLink = buildShareUrl(q);
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  S('scr-share').classList.add('active');
+
+  // Om redan accepterad — visa status direkt
+  if (q.status === 'accepted') {
+    _renderShareUI(q, q.shareToken || null);
+    return;
+  }
+
+  // Har vi redan ett token? Använd det
+  if (q.shareToken && supaUser) {
+    _renderShareUI(q, q.shareToken);
+    return;
+  }
+
+  // Inte inloggad — visa enkel länk utan accepteringsfunktion
+  if (!supaUser) {
+    const fallback = buildShareUrl(q);
+    S('share-body').innerHTML = `
+      <div style="background:rgba(232,184,75,0.06);border:1px solid var(--br2);border-radius:14px;padding:14px 16px;margin-bottom:16px;font-size:12px;color:var(--t3);line-height:1.6">
+        ⚠️ Logga in för att skapa en länk där kunden kan acceptera offerten digitalt.
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:16px;margin-bottom:16px">
+        <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px">Offertdata (länk)</div>
+        <div class="share-link-box">
+          <div class="share-link-url">${fallback}</div>
+          <button class="share-link-copy" onclick="copyLink('${fallback}')">Kopiera</button>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // Skapa nytt token — visa spinner
+  S('share-body').innerHTML = `<div class="share-creating"><div class="share-creating-spinner"></div><p>Skapar accepteringslänk…</p></div>`;
+  dbCreateShareToken(q).then(function(token) {
+    if (token) {
+      q.shareToken = token;
+      dbSaveQuote(q);
+    }
+    _renderShareUI(q, token);
+  });
+}
+
+function _renderShareUI(q, token) {
+  const link = token ? (location.origin + '/?q=' + token) : buildShareUrl(q);
   const company = settings.company || 'Ditt Företag';
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   const phone = (q.custPhone || '').replace(/\s/g, '');
-  const msg = `Hej${q.custName ? ' ' + q.custName.split(' ')[0] : ''}! Din offert från ${company} finns här: ${fakeLink}\n\nTotalt: ${fmtSEK(q.grand || 0)} inkl. moms. Klicka för att granska och signera digitalt.`;
+  const firstName = q.custName ? q.custName.split(' ')[0] : '';
+  const msg = `Hej${firstName ? ' ' + firstName : ''}! Din offert från ${company} på ${fmtSEK(q.grand || 0)} kr finns här:\n${link}\n\nDu kan acceptera direkt via länken.`;
   const smsUrl = `sms:${phone}${isIOS ? '&' : '?'}body=${encodeURIComponent(msg)}`;
   const waUrl = `https://wa.me/${phone.replace(/[^0-9+]/g, '')}?text=${encodeURIComponent(msg)}`;
-  const mailUrl = `mailto:${q.custEmail || ''}?subject=${encodeURIComponent('Din offert från ' + company)}&body=${encodeURIComponent(msg)}`;
+  const mailUrl = `mailto:${q.custEmail || ''}?subject=${encodeURIComponent('Din offert från ' + company + ' — ' + fmtSEK(q.grand || 0))}&body=${encodeURIComponent(msg)}`;
+
+  const acceptBadge = q.status === 'accepted'
+    ? `<div class="share-accepted-badge"><div class="sab-icon">✅</div><div class="sab-info"><h4>Offert accepterad!</h4><p>${q.custName || 'Kunden'} accepterade${q.acceptedAt ? ' · ' + new Date(q.acceptedAt).toLocaleDateString('sv-SE') : ''}</p></div></div>`
+    : (q.status === 'declined' ? `<div class="share-accepted-badge" style="background:rgba(200,82,82,0.07);border-color:rgba(200,82,82,0.2)"><div class="sab-icon">✗</div><div class="sab-info"><h4 style="color:var(--red)">Offert avböjd</h4><p>${q.customerNote || ''}</p></div></div>` : '');
+
   S('share-body').innerHTML = `
+    ${acceptBadge}
     <div style="background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:16px;margin-bottom:16px">
-      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px">Offertlänk</div>
-      <div class="share-link-box">
-        <div class="share-link-url">${fakeLink}</div>
-        <button class="share-link-copy" onclick="copyLink('${fakeLink}')">Kopiera</button>
+      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px">
+        ${token ? '✓ Accepteringslänk' : 'Offertlänk'}
       </div>
-      <div style="font-size:11px;color:var(--t3);line-height:1.6">Kunden kan granska offerten och signera digitalt via länken. Du notifieras direkt när de signerar.</div>
+      <div class="share-link-box">
+        <div class="share-link-url">${link}</div>
+        <button class="share-link-copy" onclick="copyLink('${link}')">Kopiera</button>
+      </div>
+      <div style="font-size:11px;color:var(--t3);line-height:1.6;margin-top:8px">
+        ${token ? 'Kunden kan acceptera eller avböja offerten direkt via länken. Du ser svaret här direkt.' : 'Logga in för att aktivera accepteringslänk.'}
+      </div>
     </div>
 
     <div style="background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:16px;margin-bottom:16px">
-      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:14px">Skicka länken via</div>
+      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:14px">Skicka via</div>
       ${q.custPhone ? `
-      <a href="${smsUrl}" onclick="markSent('${id}')" style="text-decoration:none">
-        <div class="share-channel">
-          <div class="share-ch-icon" style="background:rgba(79,175,114,0.15)">💬</div>
-          <div class="share-ch-info"><h4>SMS</h4><p>${q.custPhone}</p></div>
-          <span style="margin-left:auto;color:var(--a)">›</span>
-        </div>
+      <a href="${smsUrl}" onclick="markSent('${q.id}')" style="text-decoration:none">
+        <div class="share-channel"><div class="share-ch-icon" style="background:rgba(79,175,114,0.15)">💬</div><div class="share-ch-info"><h4>SMS</h4><p>${q.custPhone}</p></div><span style="margin-left:auto;color:var(--a)">›</span></div>
       </a>
-      <a href="${waUrl}" target="_blank" onclick="markSent('${id}')" style="text-decoration:none">
-        <div class="share-channel">
-          <div class="share-ch-icon" style="background:rgba(37,211,102,0.12)">📱</div>
-          <div class="share-ch-info"><h4>WhatsApp</h4><p>${q.custPhone}</p></div>
-          <span style="margin-left:auto;color:var(--a)">›</span>
-        </div>
-      </a>` : `<div class="share-channel" style="opacity:0.4"><div class="share-ch-icon">💬</div><div class="share-ch-info"><h4>SMS / WhatsApp</h4><p>Lägg till telefon på kunden</p></div></div>`}
+      <a href="${waUrl}" target="_blank" onclick="markSent('${q.id}')" style="text-decoration:none">
+        <div class="share-channel"><div class="share-ch-icon" style="background:rgba(37,211,102,0.12)">📱</div><div class="share-ch-info"><h4>WhatsApp</h4><p>${q.custPhone}</p></div><span style="margin-left:auto;color:var(--a)">›</span></div>
+      </a>`
+      : `<div class="share-channel" style="opacity:0.4"><div class="share-ch-icon">💬</div><div class="share-ch-info"><h4>SMS / WhatsApp</h4><p>Lägg till telefon på kunden</p></div></div>`}
       ${q.custEmail ? `
-      <a href="${mailUrl}" onclick="markSent('${id}')" style="text-decoration:none">
-        <div class="share-channel">
-          <div class="share-ch-icon" style="background:rgba(90,142,200,0.15)">✉️</div>
-          <div class="share-ch-info"><h4>E-post</h4><p>${q.custEmail}</p></div>
-          <span style="margin-left:auto;color:var(--a)">›</span>
-        </div>
-      </a>` : `<div class="share-channel" style="opacity:0.4"><div class="share-ch-icon">✉️</div><div class="share-ch-info"><h4>E-post</h4><p>Lägg till e-post på kunden</p></div></div>`}
+      <a href="${mailUrl}" onclick="markSent('${q.id}')" style="text-decoration:none">
+        <div class="share-channel"><div class="share-ch-icon" style="background:rgba(90,142,200,0.15)">✉️</div><div class="share-ch-info"><h4>E-post</h4><p>${q.custEmail}</p></div><span style="margin-left:auto;color:var(--a)">›</span></div>
+      </a>`
+      : `<div class="share-channel" style="opacity:0.4"><div class="share-ch-icon">✉️</div><div class="share-ch-info"><h4>E-post</h4><p>Lägg till e-post på kunden</p></div></div>`}
     </div>
 
     <div style="background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:16px;margin-bottom:16px">
-      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px">Signaturstatus</div>
-      ${q.signedAt ? `<div class="sign-status sign-done">✅ Signerad av ${q.custName || 'kunden'} · ${new Date(q.signedAt).toLocaleDateString('sv-SE')}</div>` : `<div class="sign-status sign-pending">⏳ Väntar på signatur från ${q.custName || 'kunden'}</div>`}
-      <button onclick="openSignModal('${id}')" style="width:100%;padding:12px;border-radius:10px;background:var(--s3);border:1px solid var(--br2);color:var(--t1);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px">✍️ Signera på plats (kunden signerar nu)</button>
+      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px">Signera på plats</div>
+      ${q.signedAt ? `<div class="sign-status sign-done">✅ Signerad av ${q.custName || 'kunden'} · ${new Date(q.signedAt).toLocaleDateString('sv-SE')}</div>` : `<div class="sign-status sign-pending">⏳ Väntar på svar från ${q.custName || 'kunden'}</div>`}
+      <button onclick="openSignModal('${q.id}')" style="width:100%;padding:12px;border-radius:10px;background:var(--s3);border:1px solid var(--br2);color:var(--t1);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px">✍️ Signera fysiskt (kunden är här nu)</button>
     </div>
     <div style="height:20px"></div>
   `;
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  S('scr-share').classList.add('active');
 }
 function copyLink(url) {
   var _navigator$clipboard;
@@ -6330,7 +6493,7 @@ function checkOnboarding() {
 // which is already added in the HTML id="quota-area"
 
 /* ══════════════════════════════════════
-   LÄNKDELNING — hash-baserad offertvy
+   LÄNKDELNING — legacy hash-fallback
 ══════════════════════════════════════ */
 function buildShareUrl(q) {
   var payload = {
@@ -6340,50 +6503,123 @@ function buildShareUrl(q) {
     vat: q.vat, grand: q.grand, vatPct: q.vatPct, aiDesc: q.aiDesc,
     company: settings.company || '', companyPhone: settings.phone || ''
   };
-  try {
-    return location.origin + '/#share=' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-  } catch(e) { return location.origin; }
+  try { return location.origin + '/#share=' + btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); }
+  catch(e) { return location.origin; }
 }
 
 function checkSharedView() {
-  var hash = location.hash;
-  if (!hash.startsWith('#share=')) return false;
-  try {
-    var data = JSON.parse(decodeURIComponent(escape(atob(hash.slice(7)))));
-    renderSharedQuote(data);
+  // Ny: token-baserad ?q=TOKEN
+  var search = location.search;
+  var tokenMatch = search.match(/[?&]q=([^&]+)/);
+  if (tokenMatch) {
+    renderPublicQuotePage(tokenMatch[1]);
     return true;
-  } catch(e) { return false; }
+  }
+  // Legacy: hash-baserad #share=BASE64
+  var hash = location.hash;
+  if (hash.startsWith('#share=')) {
+    try {
+      var data = JSON.parse(decodeURIComponent(escape(atob(hash.slice(7)))));
+      renderPublicQuotePage(null, data);
+      return true;
+    } catch(e) { return false; }
+  }
+  return false;
 }
 
-function renderSharedQuote(q) {
-  var landing = S('scr-landing');
-  if (landing) landing.style.display = 'none';
+function renderPublicQuotePage(token, legacyData) {
+  // Dölj hela appen
+  document.body.style.overflow = 'hidden';
+  var wrap = document.createElement('div');
+  wrap.className = 'pub-wrap';
+  wrap.id = 'pub-quote-page';
+  wrap.innerHTML = '<div class="pub-topbar"><div class="pub-wordmark">Offert<em>s</em></div></div><div class="pub-body" id="pub-body"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:64px 20px;gap:14px"><div style="width:28px;height:28px;border:2px solid rgba(232,184,75,0.3);border-top-color:#E8B84B;border-radius:50%;animation:spin 0.8s linear infinite"></div><div style="font-size:13px;color:var(--t3)">Hämtar offert…</div></div></div>';
+  document.body.appendChild(wrap);
+  document.body.style.overflow = '';
+
+  if (legacyData) {
+    _renderPublicQuoteBody(S('pub-body'), legacyData, null, 'pending');
+    return;
+  }
+  dbGetPublicQuote(token).then(function(row) {
+    if (!row) {
+      S('pub-body').innerHTML = '<div style="text-align:center;padding:64px 20px;color:var(--t3)"><div style="font-size:40px;margin-bottom:12px">🔍</div><div style="font-size:16px;font-weight:700;color:var(--t2);margin-bottom:8px">Offerten hittades inte</div><div style="font-size:13px">Länken är ogiltig eller har gått ut.</div></div>';
+      return;
+    }
+    _renderPublicQuoteBody(S('pub-body'), row.share_data, token, row.status, row.accepted_at, row.customer_note);
+  });
+}
+
+function _renderPublicQuoteBody(container, q, token, status, acceptedAt, customerNote) {
   var tMap = { bygg:'Bygg & Snickeri', el:'El & Installation', vvs:'VVS & Rör', mark:'Mark & Anläggning', maleri:'Måleri' };
-  var div = document.createElement('div');
-  div.style.cssText = 'min-height:100svh;background:var(--bg);color:var(--t1);font-family:var(--sans);overflow-y:auto;padding:24px 20px 56px;max-width:430px;margin:0 auto';
   var linesHtml = (q.lines || []).map(function(l) {
-    return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(232,184,75,0.06);font-size:13px"><span style="color:var(--t2)">' + l.label + '</span><span style="font-family:var(--mono)">' + fmtSEK(l.cost) + '</span></div>';
+    return '<div class="pub-line"><span class="pub-line-lbl">' + _esc(l.label) + '</span><span class="pub-line-amt">' + fmtSEK(l.cost) + '</span></div>';
   }).join('');
-  div.innerHTML =
-    '<div style="font-family:\'Instrument Serif\',serif;font-size:26px;margin-bottom:28px;letter-spacing:-0.5px">Offert<em style="font-style:italic;color:#E8B84B">s</em></div>' +
-    '<div style="background:var(--s1);border:1px solid var(--br);border-radius:20px;padding:24px;margin-bottom:16px">' +
-      '<div style="font-size:36px;margin-bottom:10px">' + (q.projectIcon || '📋') + '</div>' +
-      '<div style="font-family:\'Instrument Serif\',serif;font-size:24px;margin-bottom:4px">' + (q.projectName || 'Offert') + '</div>' +
-      '<div style="font-size:12px;color:var(--t3)">' + (tMap[q.trade] || '') + (q.date ? ' · ' + q.date : '') + '</div>' +
-      (q.custName ? '<div style="font-size:13px;color:var(--t2);margin-top:6px">Till: <strong>' + q.custName + '</strong></div>' : '') +
-      '<div style="font-family:var(--mono);font-size:34px;color:#E8B84B;margin-top:16px;font-weight:500">' + fmtSEK(q.grand || 0) + '</div>' +
-      '<div style="font-size:11px;color:var(--t3);margin-top:4px">inkl. moms' + (q.rotAmt > 0 ? ' efter ROT-avdrag' : '') + '</div>' +
+  var accent = q.accentColor || '#E8B84B';
+
+  var ctaHtml = '';
+  if (!token) {
+    ctaHtml = '<div style="text-align:center;font-size:12px;color:var(--t3);padding:12px;background:var(--s2);border-radius:12px">Denna offert kan inte accepteras digitalt — kontakta ' + _esc(q.company || 'hantverkaren') + ' direkt.</div>';
+  } else if (status === 'accepted') {
+    ctaHtml = '<div class="pub-accepted-box"><span class="pub-accepted-icon">✅</span><div class="pub-accepted-title">Offert accepterad!</div><div class="pub-accepted-sub">Du har accepterat offerten från ' + _esc(q.company || 'hantverkaren') + '.' + (acceptedAt ? '<br>' + new Date(acceptedAt).toLocaleDateString('sv-SE', {day:'numeric',month:'long',year:'numeric'}) : '') + '</div></div>';
+  } else if (status === 'declined') {
+    ctaHtml = '<div class="pub-declined-box"><div style="font-size:36px;margin-bottom:10px">✗</div><div style="font-size:16px;font-weight:700;color:var(--red);margin-bottom:6px">Offert avböjd</div>' + (customerNote ? '<div style="font-size:13px;color:var(--t3)">"' + _esc(customerNote) + '"</div>' : '') + '</div>';
+  } else {
+    ctaHtml = '<div class="pub-cta"><div class="pub-validity">Offerten är giltig i 30 dagar · Acceptera med ett klick nedan</div><input class="pub-note-inp" id="pub-note-inp" type="text" placeholder="Meddelande till hantverkaren (valfritt)"><button class="pub-accept-btn" id="pub-accept-btn" onclick="_pubAccept(\'' + token + '\',\'accepted\')"><span>✓</span> Acceptera offerten</button><button class="pub-decline-btn" onclick="_pubDecline(\'' + token + '\')">Avböj offerten</button></div>';
+  }
+
+  container.innerHTML =
+    '<div class="pub-hero">' +
+      '<span class="pub-icon">' + (q.projectIcon || '📋') + '</span>' +
+      '<div class="pub-proj">' + _esc(q.projectName || 'Offert') + '</div>' +
+      '<div class="pub-meta">' + _esc(tMap[q.trade] || '') + (q.custName ? ' · Till: ' + _esc(q.custName) : '') + (q.date ? ' · ' + q.date : '') + '</div>' +
+      '<div class="pub-price" style="color:' + accent + '">' + fmtSEK(q.grand || 0) + '</div>' +
+      '<div class="pub-price-note">inkl. ' + (q.vatPct || 25) + '% moms' + (q.rotAmt > 0 ? ' · efter ROT-avdrag' : '') + '</div>' +
     '</div>' +
-    (q.aiDesc ? '<div style="background:var(--s2);border:1px solid var(--br);border-radius:14px;padding:16px;margin-bottom:16px;font-size:13px;color:var(--t2);line-height:1.7">' + q.aiDesc + '</div>' : '') +
-    '<div style="background:var(--s1);border:1px solid var(--br);border-radius:14px;padding:16px;margin-bottom:16px">' +
+    (q.aiDesc ? '<div class="pub-card"><div class="pub-section-lbl">Arbetsbeskrivning</div><div class="pub-desc">' + _esc(q.aiDesc) + '</div></div>' : '') +
+    '<div class="pub-card"><div class="pub-section-lbl">Prisuppdelning</div>' +
       linesHtml +
-      (q.rotAmt > 0 ? '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(232,184,75,0.06);font-size:13px"><span style="color:#4FAF72">ROT-avdrag (' + q.rotPct + '%)</span><span style="font-family:var(--mono);color:#4FAF72">−' + fmtSEK(q.rotAmt) + '</span></div>' : '') +
-      '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(232,184,75,0.06);font-size:13px"><span style="color:var(--t2)">Moms (' + (q.vatPct || 25) + '%)</span><span style="font-family:var(--mono)">' + fmtSEK(q.vat || 0) + '</span></div>' +
-      '<div style="display:flex;justify-content:space-between;padding:12px 0;font-size:15px;font-weight:700"><span>Totalt att betala</span><span style="font-family:var(--mono);color:#E8B84B">' + fmtSEK(q.grand || 0) + '</span></div>' +
+      (q.rotAmt > 0 ? '<div class="pub-line"><span class="pub-line-lbl" style="color:#4FAF72">ROT-avdrag (' + q.rotPct + '%)</span><span class="pub-line-amt" style="color:#4FAF72">−' + fmtSEK(q.rotAmt) + '</span></div>' : '') +
+      '<div class="pub-line"><span class="pub-line-lbl">Moms (' + (q.vatPct || 25) + '%)</span><span class="pub-line-amt">' + fmtSEK(q.vat || 0) + '</span></div>' +
+      '<div class="pub-total-row"><span>Totalt att betala</span><span class="pub-total-amt" style="color:' + accent + '">' + fmtSEK(q.grand || 0) + '</span></div>' +
     '</div>' +
-    (q.company ? '<div style="text-align:center;font-size:12px;color:var(--t3)">' + q.company + (q.companyPhone ? ' · ' + q.companyPhone : '') + '</div>' : '') +
-    '<div style="text-align:center;font-size:11px;color:var(--t3);margin-top:6px">' + (q.qNum ? 'Offert ' + q.qNum + ' · ' : '') + 'Giltig 30 dagar</div>';
-  document.body.appendChild(div);
+    ctaHtml +
+    '<div class="pub-company-footer">' +
+      (q.company ? _esc(q.company) : '') +
+      (q.companyPhone ? ' · ' + _esc(q.companyPhone) : '') +
+      (q.companyEmail ? ' · ' + _esc(q.companyEmail) : '') +
+      (q.qNum ? '<br>Offert ' + _esc(String(q.qNum)) : '') +
+    '</div>';
+}
+
+function _esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function _pubAccept(token, status) {
+  var btn = S('pub-accept-btn');
+  var note = (S('pub-note-inp') || {}).value || '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,0.2);border-top-color:#000;border-radius:50%;animation:spin 0.7s linear infinite"></span>'; }
+  dbAcceptPublicQuote(token, status, note).then(function(ok) {
+    if (ok) {
+      var cta = document.querySelector('.pub-cta');
+      if (cta) cta.innerHTML = '<div class="pub-accepted-box"><span class="pub-accepted-icon">✅</span><div class="pub-accepted-title">Offert accepterad!</div><div class="pub-accepted-sub">Hantverkaren ser ditt svar direkt.' + (note ? '<br>"' + _esc(note) + '"' : '') + '</div></div>';
+    } else {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<span>✓</span> Acceptera offerten'; }
+      alert('Något gick fel. Försök igen.');
+    }
+  });
+}
+
+function _pubDecline(token) {
+  if (!confirm('Är du säker på att du vill avböja offerten?')) return;
+  var note = (S('pub-note-inp') || {}).value || '';
+  dbAcceptPublicQuote(token, 'declined', note).then(function(ok) {
+    if (ok) {
+      var cta = document.querySelector('.pub-cta');
+      if (cta) cta.innerHTML = '<div class="pub-declined-box"><div style="font-size:36px;margin-bottom:10px">✗</div><div style="font-size:16px;font-weight:700;color:var(--red);margin-bottom:6px">Offert avböjd</div><div style="font-size:13px;color:var(--t3)">Hantverkaren har meddelats.</div></div>';
+    }
+  });
 }
 
 /* ══════════════════════════════════════
