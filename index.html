@@ -6557,9 +6557,12 @@ function _renderPublicQuoteBody(container, q, token, status, acceptedAt, custome
   }).join('');
   var accent = q.accentColor || '#E8B84B';
 
+  // Generera ett demo-token för testlänkar (legacy #share= utan riktigt token)
+  var isDemo = !token;
+  if (isDemo) token = '__demo__';
+
   var ctaHtml = '';
-  if (!token) {
-    ctaHtml = '<div style="text-align:center;font-size:12px;color:var(--t3);padding:12px;background:var(--s2);border-radius:12px">Denna offert kan inte accepteras digitalt — kontakta ' + _esc(q.company || 'hantverkaren') + ' direkt.</div>';
+  if (false) { // (reserverad — aldrig träffad nu)
   } else if (status === 'accepted') {
     ctaHtml = '<div class="pub-accepted-box"><span class="pub-accepted-icon">✅</span><div class="pub-accepted-title">Offert accepterad!</div><div class="pub-accepted-sub">Du har accepterat offerten från ' + _esc(q.company || 'hantverkaren') + '.' + (acceptedAt ? '<br>' + new Date(acceptedAt).toLocaleDateString('sv-SE', {day:'numeric',month:'long',year:'numeric'}) : '') + '</div></div>';
   } else if (status === 'declined') {
@@ -6600,10 +6603,18 @@ function _pubAccept(token, status) {
   var btn = S('pub-accept-btn');
   var note = (S('pub-note-inp') || {}).value || '';
   if (btn) { btn.disabled = true; btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,0.2);border-top-color:#000;border-radius:50%;animation:spin 0.7s linear infinite"></span>'; }
+  // Demo-läge (legacy #share= länk utan riktigt token)
+  if (token === '__demo__') {
+    setTimeout(function() {
+      var cta = document.querySelector('.pub-cta');
+      if (cta) cta.innerHTML = '<div class="pub-accepted-box"><span class="pub-accepted-icon">✅</span><div class="pub-accepted-title">Offert accepterad!</div><div class="pub-accepted-sub">Hantverkaren ser ditt svar direkt.' + (note ? '<br><em>"' + _esc(note) + '"</em>' : '') + '</div></div>';
+    }, 900);
+    return;
+  }
   dbAcceptPublicQuote(token, status, note).then(function(ok) {
     if (ok) {
       var cta = document.querySelector('.pub-cta');
-      if (cta) cta.innerHTML = '<div class="pub-accepted-box"><span class="pub-accepted-icon">✅</span><div class="pub-accepted-title">Offert accepterad!</div><div class="pub-accepted-sub">Hantverkaren ser ditt svar direkt.' + (note ? '<br>"' + _esc(note) + '"' : '') + '</div></div>';
+      if (cta) cta.innerHTML = '<div class="pub-accepted-box"><span class="pub-accepted-icon">✅</span><div class="pub-accepted-title">Offert accepterad!</div><div class="pub-accepted-sub">Hantverkaren ser ditt svar direkt.' + (note ? '<br><em>"' + _esc(note) + '"</em>' : '') + '</div></div>';
     } else {
       if (btn) { btn.disabled = false; btn.innerHTML = '<span>✓</span> Acceptera offerten'; }
       alert('Något gick fel. Försök igen.');
@@ -6614,6 +6625,12 @@ function _pubAccept(token, status) {
 function _pubDecline(token) {
   if (!confirm('Är du säker på att du vill avböja offerten?')) return;
   var note = (S('pub-note-inp') || {}).value || '';
+  // Demo-läge
+  if (token === '__demo__') {
+    var cta = document.querySelector('.pub-cta');
+    if (cta) cta.innerHTML = '<div class="pub-declined-box"><div style="font-size:36px;margin-bottom:10px">✗</div><div style="font-size:16px;font-weight:700;color:var(--red);margin-bottom:6px">Offert avböjd</div><div style="font-size:13px;color:var(--t3)">Hantverkaren har meddelats.</div></div>';
+    return;
+  }
   dbAcceptPublicQuote(token, 'declined', note).then(function(ok) {
     if (ok) {
       var cta = document.querySelector('.pub-cta');
