@@ -826,6 +826,35 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   .ld-wrap{padding:0 16px}
 }
 
+/* ── VOICE INPUT ── */
+.voice-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center}
+.voice-modal.open{display:flex;animation:fadeUp 0.22s ease}
+.voice-sheet{background:var(--s1);border-radius:24px 24px 0 0;border-top:1px solid var(--br);padding:20px 20px calc(32px + env(safe-area-inset-bottom));width:100%;max-width:430px}
+.voice-sheet-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.voice-sheet-hd h3{font-family:var(--serif);font-size:20px;letter-spacing:-0.3px}
+.voice-mic-btn{width:100%;padding:15px;border-radius:14px;border:1.5px solid var(--br);background:var(--s2);color:var(--t1);font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.18s;margin-bottom:12px;letter-spacing:0.2px}
+.voice-mic-btn:active{background:var(--s3)}
+.voice-mic-btn.recording{border-color:var(--red);color:var(--red);background:rgba(200,82,82,0.08);animation:pulse-rec 1.4s infinite}
+@keyframes pulse-rec{0%,100%{box-shadow:0 0 0 0 rgba(200,82,82,0.3)}55%{box-shadow:0 0 0 9px rgba(200,82,82,0)}}
+.voice-status-row{display:flex;align-items:center;gap:7px;margin-bottom:8px;min-height:18px}
+.voice-status-txt{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--t3);transition:color 0.2s}
+.voice-status-txt.listening{color:var(--red)}
+.voice-status-txt.processing{color:var(--a)}
+.voice-status-txt.done{color:var(--grn)}
+.voice-blink{width:7px;height:7px;border-radius:50%;background:var(--red);flex-shrink:0;display:none}
+.voice-blink.active{display:block;animation:blink-dot 0.8s infinite}
+@keyframes blink-dot{0%,100%{opacity:1}50%{opacity:0.15}}
+.voice-transcript{width:100%;min-height:72px;background:var(--s2);border:1px solid var(--br);border-radius:10px;color:var(--t1);font-family:var(--sans);font-size:13px;padding:10px 12px;resize:vertical;outline:none;margin-bottom:10px;box-sizing:border-box;line-height:1.55}
+.voice-transcript:focus{border-color:var(--br2)}
+.voice-parsed{background:var(--s2);border:1px solid var(--br);border-radius:12px;padding:12px 14px;margin-bottom:12px;display:none;flex-direction:column;gap:7px}
+.voice-parsed.visible{display:flex}
+.vp-row{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.4}
+.vp-lbl{color:var(--t3);min-width:80px;font-weight:700;flex-shrink:0;padding-top:1px}
+.vp-val{color:var(--t1)}
+.voice-btns{display:flex;gap:8px}
+.voice-btns .btn{flex:1;width:auto;padding:14px}
+.voice-btns .btn.ghost{margin-top:0}
+
 </style>
 </head>
 <body>
@@ -1374,6 +1403,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <button class="back-btn" onclick="goHome()">←</button>
       <div class="calc-htitle" id="calc-title">Ny offert</div>
       <div class="stepdots" id="step-dots"></div>
+      <button class="icon-btn" onclick="voiceOpen()" title="Prata in jobbet" style="flex-shrink:0">🎙️</button>
     </div>
     <!-- Ny stegindikator med labels -->
     <div class="step-progress" id="step-progress-bar">
@@ -6646,6 +6676,226 @@ initTheme();
 if (!checkSharedView()) {
   initApp();
 }
+
+/* ══════════════════════════════════════
+   VOICE INPUT
+══════════════════════════════════════ */
+(function() {
+  var recognition = null;
+  var isRecording = false;
+  var parsed = null;
+
+  window.voiceOpen = function() {
+    var modal = S('voice-modal');
+    if (!modal) return;
+    modal.classList.add('open');
+    setStatus('Klicka på knappen för att börja tala', '');
+  };
+
+  window.voiceClose = function() {
+    stopRecording(false);
+    var modal = S('voice-modal');
+    if (modal) modal.classList.remove('open');
+    parsed = null;
+    var parsedEl = S('voice-parsed');
+    if (parsedEl) parsedEl.classList.remove('visible');
+  };
+
+  window.voiceToggleRecording = function() {
+    if (isRecording) stopRecording(true); else startRecording();
+  };
+
+  function setStatus(msg, cls) {
+    var el = S('voice-status-txt');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'voice-status-txt' + (cls ? ' ' + cls : '');
+    var dot = S('voice-blink');
+    if (dot) dot.classList.toggle('active', cls === 'listening');
+  }
+
+  function startRecording() {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      var ta = S('voice-transcript');
+      if (ta) ta.value = '';
+      setStatus('Röstinmatning stöds tyvärr inte i denna webbläsare. Testa Chrome eller Edge.', '');
+      return;
+    }
+    recognition = new SR();
+    recognition.lang = 'sv-SE';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onstart = function() {
+      isRecording = true;
+      var btn = S('voice-mic-btn');
+      if (btn) { btn.classList.add('recording'); btn.innerHTML = '⏹ Stoppa inspelning'; }
+      setStatus('Lyssnar…', 'listening');
+    };
+
+    recognition.onresult = function(e) {
+      var final = '';
+      for (var i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
+      }
+      if (final) {
+        var ta = S('voice-transcript');
+        if (ta) ta.value = (ta.value + ' ' + final).trim();
+      }
+    };
+
+    recognition.onerror = function(e) {
+      isRecording = false;
+      resetBtn();
+      setStatus(e.error === 'not-allowed' ? 'Mikrofontillstånd nekades — tillåt i webbläsaren' : 'Fel: ' + e.error, '');
+    };
+
+    recognition.onend = function() {
+      if (isRecording) { isRecording = false; resetBtn(); processTranscript(); }
+    };
+
+    recognition.start();
+  }
+
+  function stopRecording(andProcess) {
+    if (!recognition || !isRecording) return;
+    isRecording = false;
+    recognition.stop();
+    resetBtn();
+    if (andProcess) { setStatus('Bearbetar…', 'processing'); setTimeout(processTranscript, 350); }
+  }
+
+  function resetBtn() {
+    var btn = S('voice-mic-btn');
+    if (btn) { btn.classList.remove('recording'); btn.innerHTML = '🎙️ Börja tala'; }
+  }
+
+  function processTranscript() {
+    var ta = S('voice-transcript');
+    var text = ta ? ta.value.trim() : '';
+    if (!text) { setStatus('Inget ljud uppfångades — försök igen', ''); return; }
+    parsed = parseVoiceText(text);
+    showParsed(parsed);
+    setStatus('Klart ✓', 'done');
+  }
+
+  function parseVoiceText(text) {
+    var r = {}, t = text;
+
+    var nameM = t.match(/\b(?:hos|kunden?|åt|för|till)\s+([A-ZÅÄÖ][a-zåäö]+(?:\s+[A-ZÅÄÖ][a-zåäö]+)*)/);
+    if (!nameM) nameM = t.match(/^([A-ZÅÄÖ][a-zåäö]+\s+[A-ZÅÄÖ][a-zåäö]+)/);
+    if (nameM) r.name = nameM[1].trim();
+
+    var addrM = t.match(/\b(?:på|vid)\s+([A-ZÅÄÖ][a-zåäö]+(?:gatan?|vägen?|leden?|stigen?|allén?|torget?|gränd|plan)?\s*\d+[a-zA-Z]?(?:,\s*[A-ZÅÄÖ][a-zåäö]+)?)/i);
+    if (addrM) r.addr = addrM[1].trim();
+
+    var hourM = t.match(/(\d+(?:[,.]\d+)?)\s*timmar?/i);
+    if (hourM) r.hours = parseFloat(hourM[1].replace(',', '.'));
+
+    var dimM = t.match(/(\d+(?:[,.]\d+)?)\s*(?:kvadratmeter|kvm|m[²2])/i);
+    if (!dimM) dimM = t.match(/(?:ungefär\s+)?(\d+(?:[,.]\d+)?)\s*meter/i);
+    if (dimM) r.dimension = parseFloat(dimM[1].replace(',', '.'));
+
+    var jobTypes = [
+      [/innervägg|bygga.*vägg/i,'Innervägg'], [/altan|trädäck/i,'Altan'],
+      [/golv(?:läggning)?/i,'Golv'], [/takbyte|lägga.*tak/i,'Tak'],
+      [/staket|plank/i,'Staket/Plank'], [/el(?:installation|central|ledning|uttag|krets)|elkabel/i,'El-installation'],
+      [/badrum|dusch|toalett|\bwc\b/i,'Badrum/VVS'], [/rör(?:installation|arbete)|(?:vvs)/i,'VVS'],
+      [/målning|(?:måla.*(?:vägg|tak|fasad))|tapetsering/i,'Målning'],
+      [/fönster(?:byte|installation)?/i,'Fönsterbyte'], [/dörr(?:byte|installation)?/i,'Dörrarbete'],
+      [/isolering/i,'Isolering'], [/schaktning|grävning|dränering|\bmark\b/i,'Markarbete'],
+    ];
+    for (var i = 0; i < jobTypes.length; i++) {
+      if (jobTypes[i][0].test(t)) { r.jobType = jobTypes[i][1]; break; }
+    }
+
+    var matM = t.match(/material(?:\s+(?:som\s+)?(?:behövs|är|inkluderar|:))?\s*([^.]+)/i);
+    if (matM) {
+      r.material = matM[1].trim();
+    } else {
+      var matKeywords = ['reglar?','gipsskiv(?:or|a)','isolering','skruv(?:ar)?','färg(?:er)?','cement','betong','tegel','kabel','rör','trävirke','brädor','spånskiva','lecablock','kakel','puts'];
+      var found = [];
+      for (var mi = 0; mi < matKeywords.length; mi++) {
+        if (new RegExp('\\b' + matKeywords[mi] + '\\b', 'i').test(t)) found.push(matKeywords[mi].replace(/[?()|]/g,''));
+      }
+      if (found.length) r.material = found.join(', ');
+    }
+
+    r.rawText = text;
+    return r;
+  }
+
+  function showParsed(data) {
+    var el = S('voice-parsed');
+    if (!el) return;
+    var rows = [];
+    if (data.name)      rows.push(['👤 Kund', data.name]);
+    if (data.addr)      rows.push(['📍 Adress', data.addr]);
+    if (data.jobType)   rows.push(['🔨 Jobbtyp', data.jobType]);
+    if (data.dimension) rows.push(['📐 Mått', data.dimension + ' m']);
+    if (data.hours)     rows.push(['⏱ Timmar', data.hours + ' tim']);
+    if (data.material)  rows.push(['🪵 Material', data.material]);
+    if (!rows.length) { el.classList.remove('visible'); return; }
+    el.innerHTML = rows.map(function(r) {
+      return '<div class="vp-row"><span class="vp-lbl">' + r[0] + '</span><span class="vp-val">' + r[1] + '</span></div>';
+    }).join('');
+    el.classList.add('visible');
+  }
+
+  window.voiceApply = function() {
+    if (!parsed) {
+      var ta = S('voice-transcript');
+      if (ta && ta.value.trim()) { parsed = parseVoiceText(ta.value); showParsed(parsed); }
+      else { showToast('Ingen text att tolka'); return; }
+    }
+    var d = parsed;
+    if (d.name && S('c-name') && !S('c-name').value) S('c-name').value = d.name;
+    if (d.addr && S('c-addr') && !S('c-addr').value) S('c-addr').value = d.addr;
+
+    var noteLines = [];
+    if (d.jobType)   noteLines.push(d.jobType);
+    if (d.material)  noteLines.push('Material: ' + d.material);
+    if (d.dimension && !d.hours) noteLines.push('Mått: ' + d.dimension + ' m');
+    if (noteLines.length && S('c-note') && !S('c-note').value) S('c-note').value = noteLines.join('\n');
+
+    if (d.hours) {
+      fieldValues['arbete'] = d.hours;
+      var arbEl = S('fld-arbete');
+      if (arbEl) { if (arbEl.tagName === 'INPUT') arbEl.value = d.hours; else arbEl.textContent = d.hours; }
+    }
+    if (d.dimension) {
+      fieldValues['yta'] = d.dimension;
+      var ytaEl = S('fld-yta');
+      if (ytaEl) { if (ytaEl.tagName === 'INPUT') ytaEl.value = d.dimension; else ytaEl.textContent = d.dimension; }
+    }
+    if (currentStep === 3) renderBreakdown();
+
+    showToast('✅ Fält ifyllda från röstinmatning');
+    voiceClose();
+  };
+})();
 </script>
+
+<!-- ══ VOICE INPUT MODAL ══ -->
+<div id="voice-modal" class="voice-modal" onclick="if(event.target===this)voiceClose()">
+  <div class="voice-sheet">
+    <div class="voice-sheet-hd">
+      <h3>🎙️ Prata in jobbet</h3>
+      <button class="icon-btn" onclick="voiceClose()">✕</button>
+    </div>
+    <button class="voice-mic-btn" id="voice-mic-btn" onclick="voiceToggleRecording()">🎙️ Börja tala</button>
+    <div class="voice-status-row">
+      <div class="voice-blink" id="voice-blink"></div>
+      <span class="voice-status-txt" id="voice-status-txt">Redo</span>
+    </div>
+    <textarea class="voice-transcript" id="voice-transcript" placeholder="Transkriberad text visas här — eller skriv in jobbet manuellt…"></textarea>
+    <div class="voice-parsed" id="voice-parsed"></div>
+    <div class="voice-btns">
+      <button class="btn primary" onclick="voiceApply()">✓ Fyll i formulär</button>
+      <button class="btn ghost" onclick="voiceClose()">Avbryt</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
