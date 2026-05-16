@@ -6915,9 +6915,15 @@ if (!checkSharedView()) {
     var key = getOpenAIKey();
     var notice = S('voice-nokey-notice');
     if (notice) notice.style.display = key ? 'none' : 'block';
+    var micBtn = S('voice-mic-btn');
+    if (micBtn) micBtn.style.display = key ? '' : 'none';
+    var statusRow = modal.querySelector('.voice-status-row');
+    if (statusRow) statusRow.style.display = key ? '' : 'none';
     var ta = S('voice-transcript');
-    if (ta) ta.style.display = key ? 'none' : 'block';
-    setStatus(key ? 'Tryck för att berätta om jobbet' : 'Klicka för att börja tala', '');
+    if (ta) ta.style.display = key ? 'none' : 'none';
+    var btns = modal.querySelector('.voice-btns');
+    if (btns) btns.style.display = key ? '' : 'none';
+    if (key) setStatus('Tryck för att berätta om jobbet', '');
   };
 
   window.voiceClose = function() {
@@ -7121,6 +7127,11 @@ if (!checkSharedView()) {
       <h3>🎙️ AI-jobbassistent</h3>
       <button class="icon-btn" onclick="voiceClose()">✕</button>
     </div>
+    <div id="voice-nokey-notice" style="display:none;margin-bottom:12px;padding:14px 16px;background:rgba(232,184,75,0.12);border:1.5px solid var(--a);border-radius:12px;text-align:center">
+      <div style="font-size:15px;margin-bottom:4px">🔑 API-nyckel saknas</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.5">Lägg till din OpenAI API-nyckel för att aktivera AI-konversation. Nyckeln sparas bara lokalt på din enhet.</div>
+      <button class="btn primary" style="width:100%" onclick="voiceClose();showScreen('settings')">⚙️ Öppna inställningar →</button>
+    </div>
     <div class="vchat-wrap" id="voice-chat" style="display:none"></div>
     <button class="voice-mic-btn" id="voice-mic-btn" onclick="voiceToggleRecording()">🎙️ Börja tala</button>
     <div class="voice-status-row">
@@ -7129,7 +7140,6 @@ if (!checkSharedView()) {
     </div>
     <textarea class="voice-transcript" id="voice-transcript" placeholder="Transkriberad text visas här — eller skriv in manuellt…"></textarea>
     <div class="voice-parsed" id="voice-parsed"></div>
-    <div id="voice-nokey-notice" style="display:none;font-size:11px;color:var(--t3);text-align:center;margin-bottom:8px;line-height:1.5;padding:8px 12px;background:var(--s2);border-radius:8px;border:1px solid var(--br)">Lägg till OpenAI API-nyckel i ⚙️ Inställningar för AI-konversation</div>
     <div class="voice-btns">
       <button class="btn primary" id="voice-apply-btn" onclick="voiceApply()">✓ Fyll i formulär</button>
       <button class="btn ghost" onclick="voiceReset()">↺ Börja om</button>
