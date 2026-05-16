@@ -859,6 +859,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .voice-fab-wrap{position:relative;flex-shrink:0}
 .voice-fab-wrap::after{content:'';position:absolute;inset:-3px;border-radius:14px;border:1.5px solid rgba(232,184,75,0.35);pointer-events:none;animation:vfab-ring 2.5s ease infinite}
 @keyframes vfab-ring{0%,100%{opacity:0.7;transform:scale(1)}50%{opacity:0;transform:scale(1.18)}}
+.vchat-wrap{display:flex;flex-direction:column;gap:7px;max-height:160px;overflow-y:auto;margin-bottom:10px;padding:2px 0;scrollbar-width:none}
+.vchat-wrap::-webkit-scrollbar{display:none}
+.vchat-bubble{padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.5;max-width:88%;word-break:break-word}
+.vchat-user{background:rgba(232,184,75,0.12);border:1px solid var(--br2);color:var(--t1);align-self:flex-end;border-bottom-right-radius:3px}
+.vchat-ai{background:var(--s2);border:1px solid var(--br);color:var(--t1);align-self:flex-start;border-bottom-left-radius:3px}
 
 </style>
 </head>
@@ -1615,6 +1620,16 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
           <div class="cswatch" style="background:#D07830" data-c="#D07830" onclick="pickColor(this)"></div>
           <div class="cswatch" style="background:#9B72C8" data-c="#9B72C8" onclick="pickColor(this)"></div>
           <div class="cswatch" style="background:#C85252" data-c="#C85252" onclick="pickColor(this)"></div>
+        </div>
+      </div>
+    </div>
+    <div class="s-sect">
+      <div class="s-sect-hd">🤖 AI-assistent (röst)</div>
+      <div class="s-body">
+        <div class="ff">
+          <label>OpenAI API-nyckel</label>
+          <input id="s-openai-key" type="password" placeholder="sk-...">
+          <div style="font-size:11px;color:var(--t3);margin-top:5px;line-height:1.55">Aktiverar konversationsläge i röstassistenten — AI:n ställer följdfrågor, ger feedback och skapar offertunderlaget. Hämta på <span style="color:var(--a)">platform.openai.com</span>. Sparas lokalt på enheten.</div>
         </div>
       </div>
     </div>
@@ -5618,6 +5633,8 @@ function loadSettings() {
     const el = S('s-' + k);
     if (el && settings[k] !== undefined) el.value = settings[k];
   });
+  var oaiEl = S('s-openai-key');
+  if (oaiEl && settings.openaiKey) oaiEl.value = settings.openaiKey;
   document.querySelectorAll('.cswatch').forEach(s => s.classList.toggle('sel', s.dataset.c === accentColor));
   renderProfGrid('settings-prof-grid');
   renderPriceList();
@@ -5638,6 +5655,8 @@ function saveSettings() {
     var sel = S('s-' + skeys[si]);
     if (sel) settings[skeys[si]] = sel.value;
   }
+  var oaiSave = S('s-openai-key');
+  if (oaiSave) { settings.openaiKey = oaiSave.value.trim(); localStorage.setItem('kly_openai_key', settings.openaiKey); }
   settings.accentColor = accentColor;
   localStorage.setItem('kly_settings', JSON.stringify(settings));
   dbSaveSettings(settings);
@@ -6683,13 +6702,101 @@ if (!checkSharedView()) {
 }
 
 /* ══════════════════════════════════════
-   VOICE INPUT — smart project matcher
+   VOICE INPUT — OpenAI conversational
 ══════════════════════════════════════ */
 (function() {
   var recognition = null;
   var isRecording = false;
+  var isSpeaking = false;
+  var conversationHistory = [];
   var parsed = null;
   var pendingVoiceData = null;
+
+  var SYSTEM_PROMPT = 'Du är en jobbassistent för svenska hantverkare som hjälper skapa offerter.\n\nProjektmallar (trade → project-id → beskrivning):\nbygg: altan (trädäck/uteplats), plank (staket), golv (parkett/klinker/vinyl), tak (takrenovering/byte), mur (betong/grundlägg)\nel: uttag (eluttag/brytare), lampa (belysning/LED/armaturer), central (elcentral), laddbox (elbilsladdning)\nvvs: badrum (kakel/sanitet/renovering), ror (rördragning/vatten/avlopp), vp (värmepump), kyl (AC/kylanläggning)\nmark: schakt (grävning/schaktning), asfalt (asfaltering), dran (dränering)\nmaleri: innervagg (måla rum/väggar/tapetsering), utomhus (fasadmålning/panel)\n\nExtrahera jobbinfo och ställ EN kortfråga om info saknas. Max 2 meningar i svaret.\nSvara ALLTID med ett JSON-block sist (exakt format, null om okänt):\n{"trade":null,"project":null,"name":null,"addr":null,"hours":null,"dimension":null,"material":null,"done":false}\n"done":true när du har minst trade+project och (hours eller dimension).\nSvara alltid på svenska.';
+
+  // ── OpenAI helpers ─────────────────────────────────────
+  function getOpenAIKey() {
+    return (settings.openaiKey || localStorage.getItem('kly_openai_key') || '').trim();
+  }
+
+  function callOpenAI(userText) {
+    addChatBubble(userText, 'user');
+    conversationHistory.push({role:'user', content: userText});
+    setStatus('AI tänker…', 'processing');
+    fetch('https://api.openai.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer ' + getOpenAIKey()},
+      body: JSON.stringify({model:'gpt-4o-mini', messages:[{role:'system',content:SYSTEM_PROMPT}].concat(conversationHistory), max_tokens:350, temperature:0.25})
+    })
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var content = (data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'';
+      if (!content) throw new Error('Tomt svar');
+      conversationHistory.push({role:'assistant', content:content});
+      var jm = content.match(/\{[\s\S]*?"done"[\s\S]*?\}/);
+      var extracted = null;
+      if (jm) { try { extracted = JSON.parse(jm[0]); } catch(e){} }
+      var textPart = content.replace(/\{[\s\S]*?\}/g,'').trim() || 'OK.';
+      addChatBubble(textPart, 'ai');
+      speak(textPart);
+      if (extracted) {
+        parsed = {
+          name:      extracted.name||null,
+          addr:      extracted.addr||null,
+          hours:     extracted.hours!=null ? Number(extracted.hours) : null,
+          dimension: extracted.dimension!=null ? Number(extracted.dimension) : null,
+          material:  extracted.material||null,
+          match:     extracted.trade ? {trade:extracted.trade, project:extracted.project||null} : null,
+          done:      !!extracted.done,
+          rawText:   userText
+        };
+        showParsed(parsed);
+        if (extracted.done) {
+          setStatus('Redo — tryck för att skapa offerten', 'done');
+          var btn = S('voice-apply-btn');
+          if (btn) {btn.textContent='🚀 Skapa offert';btn.style.background='var(--grn)';btn.style.color='#fff';}
+        } else {
+          setStatus('Svara på frågan ovan…', '');
+        }
+      } else {
+        setStatus('Svara på frågan ovan…', '');
+      }
+    })
+    .catch(function(err){
+      console.error('OpenAI:', err);
+      addChatBubble('Kunde inte nå AI. Kontrollera API-nyckeln i ⚙️ Inställningar.','ai');
+      setStatus('Anslutningsfel','');
+    });
+  }
+
+  function addChatBubble(text, role) {
+    var c = S('voice-chat');
+    if (!c) return;
+    c.style.display = 'flex';
+    var div = document.createElement('div');
+    div.className = 'vchat-bubble vchat-' + role;
+    div.textContent = text;
+    c.appendChild(div);
+    c.scrollTop = c.scrollHeight;
+  }
+
+  // ── TTS ────────────────────────────────────────────────
+  function speak(text) {
+    var synth = window.speechSynthesis;
+    if (!synth || !text) return;
+    synth.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'sv-SE'; u.rate = 1.05;
+    var sv = synth.getVoices().find(function(v){return v.lang&&v.lang.startsWith('sv');});
+    if (sv) u.voice = sv;
+    isSpeaking = true;
+    u.onend = function(){isSpeaking=false;};
+    synth.speak(u);
+  }
+  function stopSpeak() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    isSpeaking = false;
+  }
 
   // ── Project matcher table ──────────────────────────────
   var PROJECT_MAP = [
@@ -6800,21 +6907,36 @@ if (!checkSharedView()) {
     }, 60);
   }
 
-  // ── Open / Close ──────────────────────────────────────
+  // ── Open / Close / Reset ──────────────────────────────
   window.voiceOpen = function() {
     var modal = S('voice-modal');
     if (!modal) return;
     modal.classList.add('open');
-    setStatus('Klicka på knappen för att börja tala', '');
+    var key = getOpenAIKey();
+    var notice = S('voice-nokey-notice');
+    if (notice) notice.style.display = key ? 'none' : 'block';
+    var ta = S('voice-transcript');
+    if (ta) ta.style.display = key ? 'none' : 'block';
+    setStatus(key ? 'Tryck för att berätta om jobbet' : 'Klicka för att börja tala', '');
   };
 
   window.voiceClose = function() {
     stopRecording(false);
+    stopSpeak();
     var modal = S('voice-modal');
     if (modal) modal.classList.remove('open');
-    parsed = null;
-    var parsedEl = S('voice-parsed');
-    if (parsedEl) parsedEl.classList.remove('visible');
+  };
+
+  window.voiceReset = function() {
+    conversationHistory = []; parsed = null; pendingVoiceData = null;
+    var chat = S('voice-chat');
+    if (chat) { chat.innerHTML = ''; chat.style.display = 'none'; }
+    var pe = S('voice-parsed'); if (pe) pe.classList.remove('visible');
+    var ta = S('voice-transcript'); if (ta) ta.value = '';
+    var btn = S('voice-apply-btn');
+    if (btn) { btn.textContent = '✓ Fyll i formulär'; btn.style.background = ''; btn.style.color = ''; }
+    setStatus('Redo — tryck för att börja', '');
+    stopSpeak();
   };
 
   window.voiceToggleRecording = function() {
@@ -6831,6 +6953,7 @@ if (!checkSharedView()) {
   }
 
   function startRecording() {
+    stopSpeak();
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
       var ta = S('voice-transcript');
@@ -6846,7 +6969,7 @@ if (!checkSharedView()) {
     recognition.onstart = function() {
       isRecording = true;
       var btn = S('voice-mic-btn');
-      if (btn) { btn.classList.add('recording'); btn.innerHTML = '⏹ Stoppa inspelning'; }
+      if (btn) { btn.classList.add('recording'); btn.innerHTML = '⏹ Stoppa'; }
       setStatus('Lyssnar…', 'listening');
     };
 
@@ -6891,9 +7014,15 @@ if (!checkSharedView()) {
     var ta = S('voice-transcript');
     var text = ta ? ta.value.trim() : '';
     if (!text) { setStatus('Inget ljud uppfångades — försök igen', ''); return; }
-    parsed = parseVoiceText(text);
-    showParsed(parsed);
-    setStatus('Klart ✓', 'done');
+    var key = getOpenAIKey();
+    if (key) {
+      if (ta) ta.value = '';
+      callOpenAI(text);
+    } else {
+      parsed = parseVoiceText(text);
+      showParsed(parsed);
+      setStatus('Klart ✓', 'done');
+    }
   }
 
   function parseVoiceText(text) {
@@ -6972,7 +7101,7 @@ if (!checkSharedView()) {
     // Navigate + fill project fields
     if (d.match) {
       autoNavigate(d.match, {hours: d.hours != null ? d.hours : null, dimension: d.dimension != null ? d.dimension : null});
-      voiceClose();
+      stopSpeak(); voiceClose();
       return;
     }
 
@@ -6980,7 +7109,7 @@ if (!checkSharedView()) {
     if (d.hours != null) fieldValues['arbete'] = d.hours;
     if (currentStep === 3) { renderCalcInputs(); renderBreakdown(); }
     showToast('Fält ifyllda — välj projekt manuellt');
-    voiceClose();
+    stopSpeak(); voiceClose();
   };
 })();
 </script>
@@ -6989,19 +7118,21 @@ if (!checkSharedView()) {
 <div id="voice-modal" class="voice-modal" onclick="if(event.target===this)voiceClose()">
   <div class="voice-sheet">
     <div class="voice-sheet-hd">
-      <h3>🎙️ Prata in jobbet</h3>
+      <h3>🎙️ AI-jobbassistent</h3>
       <button class="icon-btn" onclick="voiceClose()">✕</button>
     </div>
+    <div class="vchat-wrap" id="voice-chat" style="display:none"></div>
     <button class="voice-mic-btn" id="voice-mic-btn" onclick="voiceToggleRecording()">🎙️ Börja tala</button>
     <div class="voice-status-row">
       <div class="voice-blink" id="voice-blink"></div>
       <span class="voice-status-txt" id="voice-status-txt">Redo</span>
     </div>
-    <textarea class="voice-transcript" id="voice-transcript" placeholder="Transkriberad text visas här — eller skriv in jobbet manuellt…"></textarea>
+    <textarea class="voice-transcript" id="voice-transcript" placeholder="Transkriberad text visas här — eller skriv in manuellt…"></textarea>
     <div class="voice-parsed" id="voice-parsed"></div>
+    <div id="voice-nokey-notice" style="display:none;font-size:11px;color:var(--t3);text-align:center;margin-bottom:8px;line-height:1.5;padding:8px 12px;background:var(--s2);border-radius:8px;border:1px solid var(--br)">Lägg till OpenAI API-nyckel i ⚙️ Inställningar för AI-konversation</div>
     <div class="voice-btns">
-      <button class="btn primary" onclick="voiceApply()">✓ Fyll i formulär</button>
-      <button class="btn ghost" onclick="voiceClose()">Avbryt</button>
+      <button class="btn primary" id="voice-apply-btn" onclick="voiceApply()">✓ Fyll i formulär</button>
+      <button class="btn ghost" onclick="voiceReset()">↺ Börja om</button>
     </div>
   </div>
 </div>
