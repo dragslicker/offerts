@@ -854,6 +854,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .voice-btns{display:flex;gap:8px}
 .voice-btns .btn{flex:1;width:auto;padding:14px}
 .voice-btns .btn.ghost{margin-top:0}
+.voice-fab{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--br2);background:rgba(232,184,75,0.13);color:var(--a);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:all 0.18s}
+.voice-fab:active{background:rgba(232,184,75,0.25);transform:scale(0.92)}
+.voice-fab-wrap{position:relative;flex-shrink:0}
+.voice-fab-wrap::after{content:'';position:absolute;inset:-3px;border-radius:14px;border:1.5px solid rgba(232,184,75,0.35);pointer-events:none;animation:vfab-ring 2.5s ease infinite}
+@keyframes vfab-ring{0%,100%{opacity:0.7;transform:scale(1)}50%{opacity:0;transform:scale(1.18)}}
 
 </style>
 </head>
@@ -1403,7 +1408,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <button class="back-btn" onclick="goHome()">←</button>
       <div class="calc-htitle" id="calc-title">Ny offert</div>
       <div class="stepdots" id="step-dots"></div>
-      <button class="icon-btn" onclick="voiceOpen()" title="Prata in jobbet" style="flex-shrink:0">🎙️</button>
+      <div class="voice-fab-wrap"><button class="voice-fab" onclick="voiceOpen()" title="Prata in jobbet">🎙️</button></div>
     </div>
     <!-- Ny stegindikator med labels -->
     <div class="step-progress" id="step-progress-bar">
@@ -6678,13 +6683,124 @@ if (!checkSharedView()) {
 }
 
 /* ══════════════════════════════════════
-   VOICE INPUT
+   VOICE INPUT — smart project matcher
 ══════════════════════════════════════ */
 (function() {
   var recognition = null;
   var isRecording = false;
   var parsed = null;
+  var pendingVoiceData = null;
 
+  // ── Project matcher table ──────────────────────────────
+  var PROJECT_MAP = [
+    {t:'bygg',   p:'altan',     r:/\baltan\b|trädäck|träaltan/i},
+    {t:'bygg',   p:'plank',     r:/\bplank\b|\bstaket\b/i},
+    {t:'bygg',   p:'golv',      r:/golvläggning|lägga.*golv|parkett.*golv|vinyl.*golv|nytt.*golv/i},
+    {t:'bygg',   p:'tak',       r:/takbyte|byta.*tak|takrenovering|takpannor|plåttak/i},
+    {t:'bygg',   p:'mur',       r:/\bmur\b|grundläggning|betong.*gjutning|lecablock/i},
+    {t:'el',     p:'uttag',     r:/\buttag\b|eluttag|dubbeluttag|strömbrytare|\bbrytare\b/i},
+    {t:'el',     p:'lampa',     r:/belysning|armatur|\bspottar\b|\blampa\b|\bled\b/i},
+    {t:'el',     p:'central',   r:/elcentral|säkringsskåp|automatsäkring/i},
+    {t:'el',     p:'laddbox',   r:/laddbox|elbil.*laddning|laddstation/i},
+    {t:'vvs',    p:'badrum',    r:/badrums?renovering|nytt.*badrum|kakel.*bad|toalett.*byt/i},
+    {t:'vvs',    p:'ror',       r:/rördragning|vattenstam|avloppsrör|rörinstallation/i},
+    {t:'vvs',    p:'vp',        r:/värmepump|bergvärme|luftvärmepump/i},
+    {t:'vvs',    p:'kyl',       r:/kylanläggning|\bac\b|luftkonditionering/i},
+    {t:'mark',   p:'schakt',    r:/schaktning|schakta|grävarbete|gräva.*grund/i},
+    {t:'mark',   p:'asfalt',    r:/asfaltering|asfaltera|asfalt/i},
+    {t:'mark',   p:'dran',      r:/dränering|dräneringsrör/i},
+    {t:'maleri', p:'innervagg', r:/innerväggar?|måla.*(?:rum|sovrum|kök|hall|vägg)|tapetsering|\btapet\b/i},
+    {t:'maleri', p:'utomhus',   r:/fasadmålning|måla.*fasad|ommåla.*hus|utvändigt.*måler/i},
+  ];
+  var TRADE_MAP = [
+    {t:'bygg',   r:/\bbygg\b|snickeri|snickare|innervägg|gips.*vägg|vägg.*reglar/i},
+    {t:'el',     r:/\bel\b|elinstallation|elektriker/i},
+    {t:'vvs',    r:/\bvvs\b|rörmokare|\bvatten\b|\bavlopp\b/i},
+    {t:'mark',   r:/markarbete|\bgräva\b|\bschakta\b/i},
+    {t:'maleri', r:/måleri|målare|\bmåla\b|\btapet\b/i},
+  ];
+
+  function matchProject(text) {
+    for (var i = 0; i < PROJECT_MAP.length; i++) {
+      if (PROJECT_MAP[i].r.test(text)) return {trade: PROJECT_MAP[i].t, project: PROJECT_MAP[i].p};
+    }
+    for (var j = 0; j < TRADE_MAP.length; j++) {
+      if (TRADE_MAP[j].r.test(text)) return {trade: TRADE_MAP[j].t, project: null};
+    }
+    return null;
+  }
+
+  function findDimField(proj) {
+    if (!proj) return null;
+    var pref = ['yta','langd','kakel','tatskikt','kabel'];
+    for (var i = 0; i < pref.length; i++) {
+      var f = (proj.fields || []).find(function(x){return x.id===pref[i] && x.type==='num';});
+      if (f) return f.id;
+    }
+    return null;
+  }
+
+  // Wrap pickProject to apply pending voice data after user manually picks a project
+  setTimeout(function() {
+    if (typeof pickProject === 'function') {
+      var _orig = pickProject;
+      window.pickProject = function(id, el) {
+        _orig(id, el);
+        if (pendingVoiceData) {
+          var pd = pendingVoiceData; pendingVoiceData = null;
+          if (pd.hours != null) fieldValues['arbete'] = pd.hours;
+          if (pd.dimension != null) { var df = findDimField(selectedProject); if (df) fieldValues[df] = pd.dimension; }
+          renderCalcInputs();
+          renderBreakdown();
+          if (pd.hours || pd.dimension) showToast('⏱ Tid & mått ifyllda från röst');
+        }
+      };
+    }
+  }, 0);
+
+  function autoNavigate(match, data) {
+    var tradeNames = {bygg:'Bygg & Snickeri',el:'El & Installation',vvs:'VVS & Rör',mark:'Mark',maleri:'Måleri'};
+    selectedTrade = match.trade;
+    // Update trade grid visuals
+    document.querySelectorAll('.type-tile').forEach(function(tile) {
+      var oc = tile.getAttribute('onclick') || '';
+      tile.classList.toggle('sel', oc.indexOf("'" + match.trade + "'") !== -1);
+    });
+    var prof = (PROFESSIONS||[]).find(function(x){return x.id===(settings.profession||'snickare');})||PROFESSIONS[0];
+    renderTemplatesForProf(prof);
+
+    if (!match.project) {
+      if (data && (data.hours != null || data.dimension != null)) pendingVoiceData = data;
+      goStep(2);
+      showToast('Välj projekttyp för ' + (tradeNames[match.trade] || match.trade));
+      return;
+    }
+
+    var proj = (PROJECTS[match.trade] || []).find(function(p){return p.id===match.project;});
+    if (!proj) {
+      if (data) pendingVoiceData = data;
+      goStep(2);
+      return;
+    }
+
+    selectedProject = proj;
+    fieldValues = {};
+    (proj.fields || []).forEach(function(f){ fieldValues[f.id] = f.def != null ? f.def : 0; });
+    if (data && data.hours != null) fieldValues['arbete'] = data.hours;
+    if (data && data.dimension != null) { var df2 = findDimField(proj); if (df2) fieldValues[df2] = data.dimension; }
+    var ct = S('calc-title'); if (ct) ct.textContent = proj.name;
+    goStep(3);
+
+    // Mark the project tile visually after step renders
+    setTimeout(function() {
+      document.querySelectorAll('.tmpl-tile').forEach(function(tile) {
+        var oc = tile.getAttribute('onclick') || '';
+        tile.classList.toggle('sel', oc.indexOf("'" + match.project + "'") !== -1);
+      });
+    }, 60);
+  }
+
+  // ── Open / Close ──────────────────────────────────────
   window.voiceOpen = function() {
     var modal = S('voice-modal');
     if (!modal) return;
@@ -6787,37 +6903,27 @@ if (!checkSharedView()) {
     if (!nameM) nameM = t.match(/^([A-ZÅÄÖ][a-zåäö]+\s+[A-ZÅÄÖ][a-zåäö]+)/);
     if (nameM) r.name = nameM[1].trim();
 
-    var addrM = t.match(/\b(?:på|vid)\s+([A-ZÅÄÖ][a-zåäö]+(?:gatan?|vägen?|leden?|stigen?|allén?|torget?|gränd|plan)?\s*\d+[a-zA-Z]?(?:,\s*[A-ZÅÄÖ][a-zåäö]+)?)/i);
+    var addrM = t.match(/\b(?:på|vid)\s+([A-ZÅÄÖ][a-zåäö]+(?:gatan?|vägen?|leden?|stigen?|allén?|gränd|plan|torget?)?\s*\d+[a-zA-Z]?(?:,\s*[A-ZÅÄÖ][a-zåäö]+)?)/i);
     if (addrM) r.addr = addrM[1].trim();
 
     var hourM = t.match(/(\d+(?:[,.]\d+)?)\s*timmar?/i);
     if (hourM) r.hours = parseFloat(hourM[1].replace(',', '.'));
 
     var dimM = t.match(/(\d+(?:[,.]\d+)?)\s*(?:kvadratmeter|kvm|m[²2])/i);
+    if (!dimM) dimM = t.match(/(?:ungefär\s+)?(\d+(?:[,.]\d+)?)\s*(?:lm|löpmeter)/i);
     if (!dimM) dimM = t.match(/(?:ungefär\s+)?(\d+(?:[,.]\d+)?)\s*meter/i);
     if (dimM) r.dimension = parseFloat(dimM[1].replace(',', '.'));
 
-    var jobTypes = [
-      [/innervägg|bygga.*vägg/i,'Innervägg'], [/altan|trädäck/i,'Altan'],
-      [/golv(?:läggning)?/i,'Golv'], [/takbyte|lägga.*tak/i,'Tak'],
-      [/staket|plank/i,'Staket/Plank'], [/el(?:installation|central|ledning|uttag|krets)|elkabel/i,'El-installation'],
-      [/badrum|dusch|toalett|\bwc\b/i,'Badrum/VVS'], [/rör(?:installation|arbete)|(?:vvs)/i,'VVS'],
-      [/målning|(?:måla.*(?:vägg|tak|fasad))|tapetsering/i,'Målning'],
-      [/fönster(?:byte|installation)?/i,'Fönsterbyte'], [/dörr(?:byte|installation)?/i,'Dörrarbete'],
-      [/isolering/i,'Isolering'], [/schaktning|grävning|dränering|\bmark\b/i,'Markarbete'],
-    ];
-    for (var i = 0; i < jobTypes.length; i++) {
-      if (jobTypes[i][0].test(t)) { r.jobType = jobTypes[i][1]; break; }
-    }
+    r.match = matchProject(t);
 
     var matM = t.match(/material(?:\s+(?:som\s+)?(?:behövs|är|inkluderar|:))?\s*([^.]+)/i);
     if (matM) {
       r.material = matM[1].trim();
     } else {
-      var matKeywords = ['reglar?','gipsskiv(?:or|a)','isolering','skruv(?:ar)?','färg(?:er)?','cement','betong','tegel','kabel','rör','trävirke','brädor','spånskiva','lecablock','kakel','puts'];
+      var matWords = ['reglar?','gipsskiv(?:or|a)','isolering','skruv(?:ar)?','färg(?:er)?','cement','betong','tegel','kabel','rör','trävirke','brädor','spånskiva','lecablock','kakel','puts'];
       var found = [];
-      for (var mi = 0; mi < matKeywords.length; mi++) {
-        if (new RegExp('\\b' + matKeywords[mi] + '\\b', 'i').test(t)) found.push(matKeywords[mi].replace(/[?()|]/g,''));
+      for (var mi = 0; mi < matWords.length; mi++) {
+        if (new RegExp('\\b' + matWords[mi] + '\\b', 'i').test(t)) found.push(matWords[mi].replace(/[?()|]/g,''));
       }
       if (found.length) r.material = found.join(', ');
     }
@@ -6829,10 +6935,15 @@ if (!checkSharedView()) {
   function showParsed(data) {
     var el = S('voice-parsed');
     if (!el) return;
+    var tradeNames = {bygg:'Bygg & Snickeri',el:'El & Installation',vvs:'VVS & Rör',mark:'Mark',maleri:'Måleri'};
     var rows = [];
+    if (data.match) {
+      var projObj = data.match.project ? (PROJECTS[data.match.trade]||[]).find(function(p){return p.id===data.match.project;}) : null;
+      var label = projObj ? projObj.icon + ' ' + projObj.name : (tradeNames[data.match.trade] || data.match.trade) + ' — välj underprojekt';
+      rows.push(['🔨 Projekt', label]);
+    }
     if (data.name)      rows.push(['👤 Kund', data.name]);
     if (data.addr)      rows.push(['📍 Adress', data.addr]);
-    if (data.jobType)   rows.push(['🔨 Jobbtyp', data.jobType]);
     if (data.dimension) rows.push(['📐 Mått', data.dimension + ' m']);
     if (data.hours)     rows.push(['⏱ Timmar', data.hours + ' tim']);
     if (data.material)  rows.push(['🪵 Material', data.material]);
@@ -6850,28 +6961,25 @@ if (!checkSharedView()) {
       else { showToast('Ingen text att tolka'); return; }
     }
     var d = parsed;
+
+    // Always fill customer fields (available in DOM at all steps)
     if (d.name && S('c-name') && !S('c-name').value) S('c-name').value = d.name;
     if (d.addr && S('c-addr') && !S('c-addr').value) S('c-addr').value = d.addr;
-
     var noteLines = [];
-    if (d.jobType)   noteLines.push(d.jobType);
-    if (d.material)  noteLines.push('Material: ' + d.material);
-    if (d.dimension && !d.hours) noteLines.push('Mått: ' + d.dimension + ' m');
+    if (d.material) noteLines.push('Material: ' + d.material);
     if (noteLines.length && S('c-note') && !S('c-note').value) S('c-note').value = noteLines.join('\n');
 
-    if (d.hours) {
-      fieldValues['arbete'] = d.hours;
-      var arbEl = S('fld-arbete');
-      if (arbEl) { if (arbEl.tagName === 'INPUT') arbEl.value = d.hours; else arbEl.textContent = d.hours; }
+    // Navigate + fill project fields
+    if (d.match) {
+      autoNavigate(d.match, {hours: d.hours != null ? d.hours : null, dimension: d.dimension != null ? d.dimension : null});
+      voiceClose();
+      return;
     }
-    if (d.dimension) {
-      fieldValues['yta'] = d.dimension;
-      var ytaEl = S('fld-yta');
-      if (ytaEl) { if (ytaEl.tagName === 'INPUT') ytaEl.value = d.dimension; else ytaEl.textContent = d.dimension; }
-    }
-    if (currentStep === 3) renderBreakdown();
 
-    showToast('✅ Fält ifyllda från röstinmatning');
+    // No project match — just pre-fill what we can
+    if (d.hours != null) fieldValues['arbete'] = d.hours;
+    if (currentStep === 3) { renderCalcInputs(); renderBreakdown(); }
+    showToast('Fält ifyllda — välj projekt manuellt');
     voiceClose();
   };
 })();
